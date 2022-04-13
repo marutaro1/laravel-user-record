@@ -17486,21 +17486,21 @@ var routes = [{
     },
     props: true
   }, {
-    path: '/factoryusers/:id/manuel',
+    path: '/factoryusers/:login_user_id/:id/manuel',
     name: 'Manuel',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Manuel_vue").then(__webpack_require__.bind(__webpack_require__, /*! ../components/Manuel.vue */ "./resources/js/components/Manuel.vue"));
     },
     props: true
   }, {
-    path: '/factoryusers/:id/medicalhistory',
+    path: '/factoryusers/:login_user_id/:id/medicalhistory',
     name: 'MedicalHistory',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_MedicalHistory_vue").then(__webpack_require__.bind(__webpack_require__, /*! ../components/MedicalHistory.vue */ "./resources/js/components/MedicalHistory.vue"));
     },
     props: true
   }, {
-    path: '/factoryusers/:id/treatment',
+    path: '/factoryusers/:login_user_id/:id/treatment',
     name: 'Treatment',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Treatment_vue").then(__webpack_require__.bind(__webpack_require__, /*! ../components/Treatment.vue */ "./resources/js/components/Treatment.vue"));

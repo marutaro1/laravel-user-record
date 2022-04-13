@@ -33,19 +33,19 @@ const routes = [
                 props: true,
             },
             {
-                path: '/factoryusers/:id/manuel',
+                path: '/factoryusers/:login_user_id/:id/manuel',
                 name: 'Manuel',
                 component: () => import('../components/Manuel.vue'),
                 props: true,
             },
             {
-                path: '/factoryusers/:id/medicalhistory',
+                path: '/factoryusers/:login_user_id/:id/medicalhistory',
                 name: 'MedicalHistory',
                 component: () => import('../components/MedicalHistory.vue'),
                 props: true,
             },
             {
-                path: '/factoryusers/:id/treatment',
+                path: '/factoryusers/:login_user_id/:id/treatment',
                 name: 'Treatment',
                 component: () => import('../components/Treatment.vue'),
                 props: true,

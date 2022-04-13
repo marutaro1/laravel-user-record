@@ -32,17 +32,17 @@
     </div>
     <hr />
     <h4>記録</h4>
-    <div class="text-center">
-      <button class="btn btn-warning mt-1 mb-3">
-        : コピー
+    <div v-if="copy_button_boolean === true" class="text-center">
+      <button @click="copyArchives" class="btn btn-warning mt-1 mb-3">
+        {{serch_archive_select_day}}:記録コピー
       </button>
     </div>
 
-    <div class="scroll-user">
-      <div v-for="archive in archives" :key="archive.id">
+    <div class="overflow-auto" style="height:600px;">
+      <div v-for="archive in sortArchives" :key="archive.id">
         <p>
           部屋番号:
-         <router-link :to="'/factoryusers/' + archive.staff_id + '/' + archive.factoryuser_id + '/records'">{{archive.factoryuser_id}}</router-link>
+         <router-link :to="'/factoryusers/' + archive.staff_id + '/' + archive.factoryuser_id + '/records'">{{archive.factoryuser_number.slice(0,-1)}}</router-link>
         </p>
         <p class="mb-0">名前: {{archive.factoryuser_name}}</p>
 
@@ -90,7 +90,7 @@
           >
             <div v-for="memo in archive_memos" :key="memo.id">
             <div v-if="archive.factoryuser_id === memo.factoryuser_id">
-              <p class="space">{{memo.memo_record}}
+              <p>{{memo.memo_record}}
                 <button
                 @click="deleteArchiveMemo(memo)"
                 class="btn btn-primary m-0 p-0"
@@ -119,34 +119,77 @@
                         "-" +
                         ("00" + (new Date().getMonth() + 1)).slice(-2) + 
                          "-" +
-                        ("00" + (new Date().getDate() + 1)).slice(-2),
+                        ("00" + (new Date().getDate())).slice(-2),
         serch_archive_select_day: '',
         update_archive_record_value: '',
         archive_memos: [],
-
+        copy_button_boolean: false,
+      }
+    },
+    computed: {
+      sortArchives() {
+        const sort_archives_data = this.archives.slice()
+                  .sort((a, b) => {
+                    return Number(a.factoryuser_number) - Number(b.factoryuser_number);
+                   });
+        return sort_archives_data;
       }
     },
     methods: {
       getArchives(day) {
+        if(day === this.serch_archive_today) {
+          this.copy_button_boolean = false;
+        } else if(day === this.serch_archive_select_day) {
+          this.copy_button_boolean = true;
+        }
         this.archives = [];
         axios.get('/api/archives').then((res) => {
           for(let i = 0; i < res.data.length; i++) {
             if(res.data[i].day.slice(0, 10) === day.slice(0, 10)) {
                 this.archives.push(res.data[i]);
                 if(day === this.serch_archive_select_day) {
-                    axios.get('/api/archives').then((responce) => {
-                      for(let i = 0; i < responce.data.length; i++) {
-                        if(responce.data[i].day.slice(0, 10) === this.serch_archive_today) {
-                          this.getArchiveMemo(responce.data[i]);
+                        if(res.data[i].day.slice(0, 10) === this.serch_archive_today) {
+                          this.getArchiveMemo(res.data[i]);
+                          console.log('コピーの日付')
                         }
-                      }
-                    });
-                } else {
+                } else  {
                   this.getArchiveMemo(res.data[i]);
+                  console.log('今日の日付')
                 }
             } 
            } 
           });
+      },
+      copyArchives() {
+        const today_archives = [];
+        axios.get('/api/archives').then((responce) => {
+          for(let n = 0; n < responce.data.length; n++) {
+            if(responce.data[n].day.slice(0,10) === this.serch_archive_today) {
+              today_archives.push(responce.data[n]);
+              console.log(today_archives)
+            }
+          }
+        }).then(() => {
+          for(let count = 0; count < today_archives.length; count++) {
+            axios.delete('/api/archives/' + today_archives[count].id);
+          }
+          for(let i = 0; i < this.archives.length; i++) {
+            const copy_archive_data = {
+              id: this.archives[i].id,
+              factoryuser_id: this.archives[i].factoryuser_id,
+              factoryuser_name: this.archives[i].factoryuser_name,
+              staff_id: this.archives[i].staff_id,
+              staff_name: this.archives[i].staff_name,
+              day: this.serch_archive_today,
+              archive_record: this.archives[i].archive_record,
+              archive_memo: this.archives[i].archive_memo
+            }
+
+            axios.post('/api/archives', copy_archive_data).then((res) => {
+              console.log(res.data);
+            })
+          }
+        });
       },
       updateArchiveRecord(archive) {
         archive.archive_record = this.update_archive_record_value;
@@ -190,7 +233,7 @@
                   this.archive_memos.push(res.data[i]);
             }
           }
-        });
+        })
       },
       deleteArchiveMemo(memo) {
         axios.delete('/api/memos/' + memo.id)

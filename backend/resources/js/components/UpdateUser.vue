@@ -1,10 +1,7 @@
 <template>
-  <div class="mt-2">
-    <div class="text-center">
-      <p>年齢: </p>
-    </div>
+  <div class="mt-2" @mousemove.once="addUserNumber">
     <hr />
-  
+  {{number}}
     <h4>利用者情報更新</h4>
 
     <label class="col-4 col-form-label">部屋番号:</label>
@@ -19,7 +16,7 @@
 
     <label class="col-4 col-form-label">部屋内番号:</label>
     <div class="col-2 col-lg-1 mb-1">
-      <select class="form-select form-select-sm">
+      <select class="form-select form-select-sm" v-model="update_add_number">
         <option>0</option>
         <option>1</option>
         <option>2</option>
@@ -50,23 +47,37 @@
          props: {
              id: String,
              login_user_id: String,
+             number: String,
          },
          data() {
            return {
              update_number: '',
+             update_add_number: '',
              update_care_level: '',
            }
          },
+         computed: {
+         },
          methods: {
           updateUser() {
+            axios.get('/api/factoryusers/' + this.id).then((res) => {
               const factoryuser = {
-                number: this.update_number,
+                number: Number(this.updateNumber + this.updateAddNumber),
+                factoryuser_name: res.data.name,
                 care_level: this.update_care_level,
+                birthday: res.data.birthday,
               }
-              axios.put('/api/factoryusers/' + this.id, factoryuser).then((res) => {
-                console.log(res);
+              axios.put('/api/factoryusers/' + this.id, factoryuser).then((responce) => {
+                console.log(responce);
+                this.$router.push('/factoryusers/' + this.login_user_id + '/' + this.id + '/records' );
               })
+            })
           },
-         }
+          addUserNumber() {
+           this.update_number = String(this.number).slice(0, -1);
+           this.update_add_number = String(this.number).slice(-1);
+          },
+
+         },
      }
  </script>

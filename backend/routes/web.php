@@ -16,14 +16,11 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-Route::get('/', function () {
-    return view('top');
+Route::get('/login', function () {
+    return view('login');
 });
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-// Route::get('/{any}', function() {
-//          return view('');
-//       })->where('any', '.*');
+Route::get('/factoryusers/{login_user_id}', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 

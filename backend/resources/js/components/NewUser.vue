@@ -43,7 +43,7 @@
     <br />
     <label class="col-4 col-form-label">部屋内番号:</label>
     <div class="col-lg-1 col-2">
-      <select class="form-select form-select-sm">
+      <select class="form-select form-select-sm" v-model="add_number">
         <option>0</option>
         <option>1</option>
         <option>2</option>
@@ -61,7 +61,8 @@
         factoryuser_name: '',
         birthday: '',
         care_level: '',
-        number: 0
+        number: 0,
+        add_number: 0,
       }
     },
     methods: {
@@ -70,8 +71,8 @@
           factoryuser_name: this.factoryuser_name,
           birthday: this.birthday,
           care_level: this.care_level,
-          number: this.number,
-          day_record_check: '',
+          number: String(this.number) + String(this.add_number),
+          day_record_check: '・',
         }
         axios.post('/api/factoryusers', factoryuser).then((res) => {
           console.log(res);

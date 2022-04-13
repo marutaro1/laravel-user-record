@@ -10,6 +10,10 @@ use App\Http\Controllers\ArchiveMemoController;
 use App\Http\Controllers\DailyWorkController;
 use App\Http\Controllers\StaffDailyWorkController;
 use App\Http\Controllers\CompleteWorkCheckController;
+use App\Http\Controllers\ManuelController;
+use App\Http\Controllers\MedicalHistoryController;
+use App\Http\Controllers\TreatmentController;
+use App\Http\Controllers\TreatmentRecordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +40,30 @@ Route::post('/factoryusers/{factoryuser}/records', [RecordController::class, 'st
 Route::get('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'show']);
 Route::put('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'update']);
 Route::delete('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'delete']);
+
+Route::get('/factoryusers/{factoryuser}/manuels', [ManuelController::class, 'index']);
+Route::post('/factoryusers/{factoryuser}/manuels', [ManuelController::class, 'store']);
+Route::get('/factoryusers/manuels/{manuel}', [ManuelController::class, 'show']);
+Route::put('/factoryusers/manuels/{manuel}', [ManuelController::class, 'update']);
+Route::delete('/factoryusers/manuels/{manuel}', [ManuelController::class, 'delete']);
+
+Route::get('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryController::class, 'index']);
+Route::post('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryController::class, 'store']);
+Route::get('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'show']);
+Route::put('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'update']);
+Route::delete('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'delete']);
+
+Route::get('/factoryusers/{factoryuser}/treatments', [TreatmentRecordController::class, 'index']);
+Route::post('/factoryusers/{factoryuser}/treatments', [TreatmentRecordController::class, 'store']);
+Route::get('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'show']);
+Route::put('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'update']);
+Route::delete('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'delete']);
+
+Route::get('/treatments', [TreatmentController::class, 'index']);
+Route::post('/treatments', [TreatmentController::class, 'store']);
+Route::get('/treatments/{treatment}', [TreatmentController::class, 'show']);
+Route::put('/treatments/{treatment}', [TreatmentController::class, 'update']);
+Route::delete('/treatments/{treatment}', [TreatmentController::class, 'delete']);
 
 Route::get('/archives', [ArchiveController::class, 'index']);
 Route::post('/archives', [ArchiveController::class, 'store']);

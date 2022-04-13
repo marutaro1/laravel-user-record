@@ -11,6 +11,8 @@ class MedicalHistory extends Model
         'factoryuser_id',
         'day',
         'medical_history_value',
+        'medical',
+        'staff_name',
         'updated_at',
         'created_at',
     ];

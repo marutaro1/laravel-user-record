@@ -19,7 +19,6 @@ class UserController extends Controller
     {
             return User::create([
                 'name' => $data['name'],
-                'user_name' => $data['user_name'],
                 'user_department' => $data['user_department'],
                 'user_official_position' => $data['user_official_position'],
                 'email' => $data['email'],
@@ -30,10 +29,8 @@ class UserController extends Controller
 
     public function show($id) 
     {
-        $user_id = Auth::id();
-        // $user_id = 1;
-        
+        // $user_id = Auth::id();
 
-        return User::find($user_id);
+        return User::find($id);
     }
 }

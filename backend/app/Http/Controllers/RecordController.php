@@ -32,11 +32,19 @@ class RecordController extends Controller
         return Record::find($record['id']);
     }
 
-    public function update(Record $record)
+    public function update(Request $request, $id)
     {
-       $record->delete();
-
+        $record = Record::find($id);
+        $record->update($request->all());
+        
         return $record;
+    }
+    public function delete($id)
+    {
+        $record = Record::find($id);
+        $record->delete();
+
+        return $record;   
     }
 
 }

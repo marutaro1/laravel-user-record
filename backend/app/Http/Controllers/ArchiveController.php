@@ -12,7 +12,7 @@ class ArchiveController extends Controller
         
         return Archive::all();
     }
-
+    
     public function store(Request $request) 
     {
         return Archive::create($request->all());

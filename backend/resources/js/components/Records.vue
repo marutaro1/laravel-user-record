@@ -1,8 +1,5 @@
 <template>
   <div class="mt-2" @mousemove.once="getRecord">
-    <div class="text-center">
-      <p>年齢: </p>
-    </div>
     <hr />
     <h4>記録</h4>
     <div>
@@ -82,13 +79,13 @@
           list="record_data"
         />
          <datalist id="record_data">
-            <option v-for="n in serchRecords" :key="n">
+            <option v-for="n in keywordSerchRecords" :key="n">
             {{ n.record_value }}
             </option>
         </datalist>
       </div>
 
-      <div class="scroll">
+      <div class="overflow-auto" style="height:300px;">
         <div v-for="(record,key) in recordArray" :key="key">
 
           <p>日付: {{record.day}}</p>
@@ -158,13 +155,21 @@
                         "-" +
                         ("00" + (new Date().getMonth() + 1)).slice(-2) +
                         "-" +
-                        ("00" + new Date().getDate()).slice(-2) +
+                        ("00" + new Date().getDate() ).slice(-2) +
                         "T" +
                         ("00" + new Date().getHours()).slice(-2) +
                         ":" +
                         "00", //入力した日付を格納する値
             
-             day: '',
+             day: new Date().getFullYear() +
+                        "-" +
+                        ("00" + (new Date().getMonth() + 1)).slice(-2) +
+                        "-" +
+                        ("00" + new Date().getDate() ).slice(-2) +
+                        "T" +
+                        ("00" + new Date().getHours()).slice(-2) +
+                        ":" +
+                        "00",
              record_value: '',
              staff_name: 'staff',
              factoryuser_record_data: {},
@@ -199,11 +204,6 @@
          },
 
          computed: {
-              recordArray() {
-                this.displayItems(serchRecords);
-                return this.arrayData;
-              },
-
               serchRecords() {
                 const record_data  = [];
                 for (let i in this.factoryuser_record_data) {
@@ -228,6 +228,15 @@
 
                 return sort_record_data;
              },
+
+             keywordSerchRecords() {
+               return this.serchRecords.slice(0, 5)
+             },
+
+            recordArray() {
+              this.displayItems(this.serchRecords);
+                return this.arrayData;
+              },
              //ページ数を取得する
              pages() {
               return Math.ceil(this.items.length / this.size);
@@ -270,18 +279,9 @@
 
          methods: {
            getLoginUser() {
-                axios.get('/api/users').then((res) => {
-                    console.log(res.data);
-                    console.log(res.data.length);
-                    for(let i = 0; i < res.data.length; i++) {
-                      if(res.data[i].id === Number(this.login_user_id)) {
-                        console.log(i);
-                        
-                        this.login_user = res.data[i];
-                        console.log(res.data[i]);
+                axios.get('/api/users/' + this.login_user_id).then((res) => {
+                        this.login_user = res.data;
                         return this.login_user;
-                      }
-                    }
                 })
             },
 
@@ -294,17 +294,26 @@
                factoryuser_id: this.id,
              }
              axios.post('/api/factoryusers/' + this.id + '/records', record_data).then((res) => {
-               console.log(res);
-               const factoryuser = {
-                factoryuser_name: this.factoryuser_name,
-                birthday: this.birthday,
-                care_level: this.care_level,
-                number: this.number,
-                day_record_check: this.day,
-              }
-               axios.put('/api/factoryusers/' + this.id, factoryuser).then((res) => {
-                 console.log(res);
-               })
+
+                axios.get('/api/factoryusers/' + this.id).then((responce) => {
+                  console.log(responce)
+                  if( new Date( responce.data[0].day_record_check + 'T00:00' ).getTime() <= new Date ( this.day ).getTime() || responce.data[0].day_record_check === '・') {
+                    const factoryuser = {
+                      factoryuser_name: this.factoryuser_name,
+                      birthday: this.birthday,
+                      care_level: this.care_level,
+                      number: this.number,
+                      day_record_check: this.day.slice(0,10),
+                    }
+                    axios.put('/api/factoryusers/' + this.id, factoryuser).then((res) => {
+                      console.log(res);
+                      this.getRecord();
+                      this.record_value = '';
+                      this.day = this.real_date;
+                    })
+                  }
+                })
+
              })
            },
 
@@ -318,7 +327,27 @@
                factoryuser_id: String(this.id)
              }
              axios.put('/api/factoryusers/factoryuser/records/' + record_id, record).then((res) => {
-               console.log(res);
+
+                  axios.get('/api/factoryusers/' + this.id).then((responce) => {
+                  console.log(responce)
+                  if( new Date( responce.data[0].day_record_check + 'T00:00' ).getTime() <= new Date ( this.update_day ).getTime() ) {
+                    const factoryuser = {
+                      factoryuser_name: this.factoryuser_name,
+                      birthday: this.birthday,
+                      care_level: this.care_level,
+                      number: this.number,
+                      day_record_check: this.update_day.slice(0,10),
+                    }
+                    axios.put('/api/factoryusers/' + this.id, factoryuser).then((res) => {
+
+                     console.log(res);
+                     this.getRecord();
+                     this.update_record_value = '';
+                     this.update_day = '';
+                     
+                    })
+                  }
+                })
              })
            },
 
@@ -347,9 +376,28 @@
            },
 
            destoryRecord(record_data) {
-             axios.put('/api/factoryusers/factoryuser/records/' + record_data.id).then((res) => {
-               console.log(res);
-               this.getRecord();
+             axios.delete('/api/factoryusers/factoryuser/records/' + record_data.id).then(() => {
+                this.getRecord();
+
+                axios.get('/api/factoryusers/' + this.id).then((responce) => {
+
+                  if( responce.data[0].day_record_check === record_data.day.slice(0,10) ) {
+                    
+                      const day_record_check_value = this.serchRecords.slice(-1)[0].day.slice(0,10);
+               
+                      const factoryuser = {
+                        factoryuser_name: this.factoryuser_name,
+                        birthday: this.birthday,
+                        care_level: this.care_level,
+                        number: this.number,
+                        day_record_check: day_record_check_value,
+                      }
+                      axios.put('/api/factoryusers/' + this.id, factoryuser).then((res) => {
+                        console.log(res.data);
+                      })
+                  }
+
+                })
              })
            },
 
@@ -365,30 +413,35 @@
            },
 
            postArchives(record) {
+             let user_name = '';
+             let user_number = '';
+             axios.get('/api/factoryusers/' + this.id).then((responce) => {
+               console.log(responce.data[0])
+               user_name = responce.data[0].factoryuser_name;
+               user_number = responce.data[0].number;
+             }).then(() => {
+
              const post_archive_value = {
                factoryuser_id: this.id,
-               factoryuser_name: 1,
+               factoryuser_name: user_name,
+               factoryuser_number: user_number,
                staff_id: this.login_user_id,
                staff_name: this.login_user.name,
-               day: record.day,
+               day: this.real_date,
                archive_record: record.record_value,
-               archive_memo: '',
+               archive_memo: '・',
              }
-             const archives_post = [];
+
              axios.get('/api/archives').then((res) => { 
                for(let i = 0; i < res.data.length; i++) {
-                    archives_post.push(res.data[i]);
-                  
-              }
-             }).then(() => {
-              for(let n = 0; n < archives_post.length; n++) {
-                 if(archives_post[n].day.slice(0, 10) === record.day.slice(0, 10) && String(archives_post[n].factoryuser_id) === this.id) {
-                    axios.delete('/api/archives/' + String(archives_post[n].id));
+                 if(res.data[i].day.slice(0, 10) === this.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === this.id) {
+                    axios.delete('/api/archives/' + String(res.data[i].id));
                  }
-
               };
              }).then(() => {
               axios.post('/api/archives', post_archive_value)
+             })
+
              })
            },
 

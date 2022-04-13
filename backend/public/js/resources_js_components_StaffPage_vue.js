@@ -78,16 +78,16 @@ __webpack_require__.r(__webpack_exports__);
           work_check: String(_this2.change_work_check),
           staff_memo: _this2.staff_memo
         };
+        var array_length = [];
 
-        if (_this2.staff_memo === '' || _this2.staff_memo === '・') {
-          axios.post('/api/complete_works', add_work_check).then(function (res) {
-            _this2.staff_memo = res.data.staff_memo;
-          });
-        } else {
-          axios.post('/api/complete_works/' + String(_this2.complete_work_id), add_work_check).then(function (res) {
-            _this2.staff_memo = res.data.staff_memo;
-          });
+        for (var n = 0; n < _this2.change_work_check.length; n++) {
+          array_length.push('');
         }
+
+        console.log(array_length);
+        axios.post('/api/complete_works/' + String(_this2.complete_work_id), add_work_check).then(function (res) {
+          _this2.staff_memo = res.data.staff_memo;
+        });
       });
     },
     getCompleteWorkCheck: function getCompleteWorkCheck() {

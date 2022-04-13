@@ -105,16 +105,16 @@
                   work_check: String(this.change_work_check),
                   staff_memo: this.staff_memo,
                 }
-
-                if(this.staff_memo === '' || this.staff_memo === '・') {
-                axios.post('/api/complete_works', add_work_check).then((res) => {
-                  this.staff_memo = res.data.staff_memo;
-                });
-                } else {
-                  axios.post('/api/complete_works/' + String(this.complete_work_id), add_work_check).then((res) => {
-                  this.staff_memo = res.data.staff_memo;
-                });
+                const array_length = []
+                for(let n = 0; n < this.change_work_check.length; n++) {
+                  array_length.push('');
                 }
+                console.log(array_length)
+             
+                  axios.post('/api/complete_works/' + String(this.complete_work_id), add_work_check).then((res) => {
+                    this.staff_memo = res.data.staff_memo;
+                  });
+                
               })
             },
             getCompleteWorkCheck() {

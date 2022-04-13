@@ -18,15 +18,30 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       archives: [],
-      serch_archive_today: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + (new Date().getDate() + 1)).slice(-2),
+      serch_archive_today: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2),
       serch_archive_select_day: '',
       update_archive_record_value: '',
-      archive_memos: []
+      archive_memos: [],
+      copy_button_boolean: false
     };
+  },
+  computed: {
+    sortArchives: function sortArchives() {
+      var sort_archives_data = this.archives.slice().sort(function (a, b) {
+        return Number(a.factoryuser_number) - Number(b.factoryuser_number);
+      });
+      return sort_archives_data;
+    }
   },
   methods: {
     getArchives: function getArchives(day) {
       var _this = this;
+
+      if (day === this.serch_archive_today) {
+        this.copy_button_boolean = false;
+      } else if (day === this.serch_archive_select_day) {
+        this.copy_button_boolean = true;
+      }
 
       this.archives = [];
       axios.get('/api/archives').then(function (res) {
@@ -35,26 +50,59 @@ __webpack_require__.r(__webpack_exports__);
             _this.archives.push(res.data[i]);
 
             if (day === _this.serch_archive_select_day) {
-              axios.get('/api/archives').then(function (responce) {
-                for (var _i = 0; _i < responce.data.length; _i++) {
-                  if (responce.data[_i].day.slice(0, 10) === _this.serch_archive_today) {
-                    _this.getArchiveMemo(responce.data[_i]);
-                  }
-                }
-              });
+              if (res.data[i].day.slice(0, 10) === _this.serch_archive_today) {
+                _this.getArchiveMemo(res.data[i]);
+
+                console.log('コピーの日付');
+              }
             } else {
               _this.getArchiveMemo(res.data[i]);
+
+              console.log('今日の日付');
             }
           }
         }
       });
     },
-    updateArchiveRecord: function updateArchiveRecord(archive) {
+    copyArchives: function copyArchives() {
       var _this2 = this;
+
+      var today_archives = [];
+      axios.get('/api/archives').then(function (responce) {
+        for (var n = 0; n < responce.data.length; n++) {
+          if (responce.data[n].day.slice(0, 10) === _this2.serch_archive_today) {
+            today_archives.push(responce.data[n]);
+            console.log(today_archives);
+          }
+        }
+      }).then(function () {
+        for (var count = 0; count < today_archives.length; count++) {
+          axios["delete"]('/api/archives/' + today_archives[count].id);
+        }
+
+        for (var i = 0; i < _this2.archives.length; i++) {
+          var copy_archive_data = {
+            id: _this2.archives[i].id,
+            factoryuser_id: _this2.archives[i].factoryuser_id,
+            factoryuser_name: _this2.archives[i].factoryuser_name,
+            staff_id: _this2.archives[i].staff_id,
+            staff_name: _this2.archives[i].staff_name,
+            day: _this2.serch_archive_today,
+            archive_record: _this2.archives[i].archive_record,
+            archive_memo: _this2.archives[i].archive_memo
+          };
+          axios.post('/api/archives', copy_archive_data).then(function (res) {
+            console.log(res.data);
+          });
+        }
+      });
+    },
+    updateArchiveRecord: function updateArchiveRecord(archive) {
+      var _this3 = this;
 
       archive.archive_record = this.update_archive_record_value;
       axios.put('/api/archives/' + archive.id, archive).then(function (res) {
-        _this2.update_archive_record_value = '';
+        _this3.update_archive_record_value = '';
       });
     },
     copyArchiveRecord: function copyArchiveRecord(archive) {
@@ -66,7 +114,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     postArchiveMemo: function postArchiveMemo(archive) {
-      var _this3 = this;
+      var _this4 = this;
 
       var archive_memo_value = {
         factoryuser_id: archive.factoryuser_id,
@@ -78,33 +126,33 @@ __webpack_require__.r(__webpack_exports__);
       axios.post('/api/memos', archive_memo_value).then(function () {
         axios.get('/api/archives').then(function (res) {
           for (var i = 0; i < res.data.length; i++) {
-            if (res.data[i].day.slice(0, 10) === _this3.serch_archive_today) {
-              _this3.getArchiveMemo(res.data[i]);
+            if (res.data[i].day.slice(0, 10) === _this4.serch_archive_today) {
+              _this4.getArchiveMemo(res.data[i]);
             }
           }
         });
       });
     },
     getArchiveMemo: function getArchiveMemo(archive) {
-      var _this4 = this;
+      var _this5 = this;
 
       this.archive_memos = [];
       axios.get('/api/memos').then(function (res) {
         for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].staff_id === Number(_this4.login_user_id) && res.data[i].day.slice(0, 10) === archive.day.slice(0, 10) && res.data[i].factoryuser_id === archive.factoryuser_id) {
-            _this4.archive_memos.push(res.data[i]);
+          if (res.data[i].staff_id === Number(_this5.login_user_id) && res.data[i].day.slice(0, 10) === archive.day.slice(0, 10) && res.data[i].factoryuser_id === archive.factoryuser_id) {
+            _this5.archive_memos.push(res.data[i]);
           }
         }
       });
     },
     deleteArchiveMemo: function deleteArchiveMemo(memo) {
-      var _this5 = this;
+      var _this6 = this;
 
       axios["delete"]('/api/memos/' + memo.id);
       axios.get('/api/archives').then(function (res) {
         for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].day.slice(0, 10) === _this5.serch_archive_today) {
-            _this5.getArchiveMemo(res.data[i]);
+          if (res.data[i].day.slice(0, 10) === _this6.serch_archive_today) {
+            _this6.getArchiveMemo(res.data[i]);
           }
         }
       });
@@ -176,16 +224,15 @@ var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_12 = {
+  key: 0,
   "class": "text-center"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-  "class": "btn btn-warning mt-1 mb-3"
-}, " : コピー ")], -1
-/* HOISTED */
-);
-
+};
 var _hoisted_13 = {
-  "class": "scroll-user"
+  "class": "overflow-auto",
+  style: {
+    "height": "600px"
+  }
 };
 
 var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" 部屋番号: ");
@@ -223,12 +270,9 @@ var _hoisted_26 = {
 var _hoisted_27 = {
   key: 0
 };
-var _hoisted_28 = {
-  "class": "space"
-};
-var _hoisted_29 = ["onClick"];
+var _hoisted_28 = ["onClick"];
 
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
@@ -270,14 +314,21 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_archive_record_value]])])]), _hoisted_10, _hoisted_11, _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.archives, function (archive) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_archive_record_value]])])]), _hoisted_10, _hoisted_11, $data.copy_button_boolean === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[5] || (_cache[5] = function () {
+      return $options.copyArchives && $options.copyArchives.apply($options, arguments);
+    }),
+    "class": "btn btn-warning mt-1 mb-3"
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.serch_archive_select_day) + ":記録コピー ", 1
+  /* TEXT */
+  )])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.sortArchives, function (archive) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: archive.id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
       to: '/factoryusers/' + archive.staff_id + '/' + archive.factoryuser_id + '/records'
     }, {
       "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-        return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(archive.factoryuser_id), 1
+        return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(archive.factoryuser_number.slice(0, -1)), 1
         /* TEXT */
         )];
       }),
@@ -328,7 +379,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     , _hoisted_25)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.archive_memos, function (memo) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         key: memo.id
-      }, [archive.factoryuser_id === memo.factoryuser_id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(memo.memo_record) + " ", 1
+      }, [archive.factoryuser_id === memo.factoryuser_id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(memo.memo_record) + " ", 1
       /* TEXT */
       ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
         onClick: function onClick($event) {
@@ -337,10 +388,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": "btn btn-primary m-0 p-0"
       }, " ✖︎ ", 8
       /* PROPS */
-      , _hoisted_29)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
+      , _hoisted_28)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
     }), 128
     /* KEYED_FRAGMENT */
-    ))])]), _hoisted_30]);
+    ))])]), _hoisted_29]);
   }), 128
   /* KEYED_FRAGMENT */
   ))])]);

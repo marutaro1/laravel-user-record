@@ -18,16 +18,23 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      factoryuser: {}
+      factoryuser: {},
+      age_data: ''
     };
   },
   methods: {
     getFactoryuser: function getFactoryuser() {
       var _this = this;
 
-      axios.get('/api/factoryusers/' + Number(this.id)).then(function (res) {
+      var day_value = '';
+      axios.get('/api/factoryusers/' + this.id).then(function (res) {
         _this.factoryuser = res.data[0];
+        day_value = res.data[0].birthday;
         console.log(res.data);
+      }).then(function () {
+        var age_time = Date.now() - new Date(day_value).getTime();
+        _this.age_data = new Date(age_time).getUTCFullYear() - 1970;
+        ;
       });
     }
   }
@@ -52,21 +59,17 @@ var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 /* HOISTED */
 );
 
-var _hoisted_2 = {
-  "class": "text-center"
-};
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("記録");
 
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("記録");
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("情報更新");
 
-var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("情報更新");
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("マニュアル");
 
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("マニュアル");
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("既往歴");
 
-var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("既往歴");
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("処置");
 
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("処置");
-
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
@@ -80,12 +83,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onMousemoveOnce: _cache[0] || (_cache[0] = function () {
       return $options.getFactoryuser && $options.getFactoryuser.apply($options, arguments);
     })
-  }, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
+  }, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
     to: '/factoryusers/' + $props.login_user_id + '/' + $props.id + '/records',
     "class": "btn btn-primary px-2 col-lg-2"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_3];
+      return [_hoisted_2];
     }),
     _: 1
     /* STABLE */
@@ -97,7 +100,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "btn btn-primary px-1 mx-1 col-lg-2"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_4];
+      return [_hoisted_3];
     }),
     _: 1
     /* STABLE */
@@ -109,7 +112,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "btn btn-primary px-1 col-lg-2"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_5];
+      return [_hoisted_4];
     }),
     _: 1
     /* STABLE */
@@ -121,7 +124,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "btn btn-primary px-1 mx-1 col-lg-2"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_6];
+      return [_hoisted_5];
     }),
     _: 1
     /* STABLE */
@@ -133,22 +136,22 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "btn btn-primary px-2 col-lg-2"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_7];
+      return [_hoisted_6];
     }),
     _: 1
     /* STABLE */
 
   }, 8
   /* PROPS */
-  , ["to"]), _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "名前: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.factoryuser_name), 1
+  , ["to"]), _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "名前: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.factoryuser_name) + " | 部屋番号: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(String($data.factoryuser.number).slice(0, -1)) + " | 要介護度: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.care_level), 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "部屋番号: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.number), 1
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "生年月日: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.birthday) + " | 年齢: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.age_data) + "歳", 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "要介護度: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.care_level), 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "生年月日: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.factoryuser.birthday), 1
-  /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_view)])], 32
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_view, {
+    number: $data.factoryuser.number
+  }, null, 8
+  /* PROPS */
+  , ["number"])])], 32
   /* HYDRATE_EVENTS */
   );
 }

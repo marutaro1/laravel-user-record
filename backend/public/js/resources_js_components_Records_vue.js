@@ -55,7 +55,7 @@ function _arrayLikeToArray(arr, len) {
     return {
       real_date: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2) + "T" + ("00" + new Date().getHours()).slice(-2) + ":" + "00",
       //入力した日付を格納する値
-      day: '',
+      day: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2) + "T" + ("00" + new Date().getHours()).slice(-2) + ":" + "00",
       record_value: '',
       staff_name: 'staff',
       factoryuser_record_data: {},
@@ -86,10 +86,6 @@ function _arrayLikeToArray(arr, len) {
     };
   },
   computed: {
-    recordArray: function recordArray() {
-      this.displayItems(serchRecords);
-      return this.arrayData;
-    },
     serchRecords: function serchRecords() {
       var _this = this;
 
@@ -120,6 +116,13 @@ function _arrayLikeToArray(arr, len) {
         return Number(new Date(a.day)) - Number(new Date(b.day));
       }).reverse();
       return sort_record_data;
+    },
+    keywordSerchRecords: function keywordSerchRecords() {
+      return this.serchRecords.slice(0, 5);
+    },
+    recordArray: function recordArray() {
+      this.displayItems(this.serchRecords);
+      return this.arrayData;
     },
     //ページ数を取得する
     pages: function pages() {
@@ -163,18 +166,9 @@ function _arrayLikeToArray(arr, len) {
     getLoginUser: function getLoginUser() {
       var _this2 = this;
 
-      axios.get('/api/users').then(function (res) {
-        console.log(res.data);
-        console.log(res.data.length);
-
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].id === Number(_this2.login_user_id)) {
-            console.log(i);
-            _this2.login_user = res.data[i];
-            console.log(res.data[i]);
-            return _this2.login_user;
-          }
-        }
+      axios.get('/api/users/' + this.login_user_id).then(function (res) {
+        _this2.login_user = res.data;
+        return _this2.login_user;
       });
     },
     submit: function submit() {
@@ -188,20 +182,32 @@ function _arrayLikeToArray(arr, len) {
         factoryuser_id: this.id
       };
       axios.post('/api/factoryusers/' + this.id + '/records', record_data).then(function (res) {
-        console.log(res);
-        var factoryuser = {
-          factoryuser_name: _this3.factoryuser_name,
-          birthday: _this3.birthday,
-          care_level: _this3.care_level,
-          number: _this3.number,
-          day_record_check: _this3.day
-        };
-        axios.put('/api/factoryusers/' + _this3.id, factoryuser).then(function (res) {
-          console.log(res);
+        axios.get('/api/factoryusers/' + _this3.id).then(function (responce) {
+          console.log(responce);
+
+          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this3.day).getTime() || responce.data[0].day_record_check === '・') {
+            var factoryuser = {
+              factoryuser_name: _this3.factoryuser_name,
+              birthday: _this3.birthday,
+              care_level: _this3.care_level,
+              number: _this3.number,
+              day_record_check: _this3.day.slice(0, 10)
+            };
+            axios.put('/api/factoryusers/' + _this3.id, factoryuser).then(function (res) {
+              console.log(res);
+
+              _this3.getRecord();
+
+              _this3.record_value = '';
+              _this3.day = _this3.real_date;
+            });
+          }
         });
       });
     },
     updateRecord: function updateRecord(record_id) {
+      var _this4 = this;
+
       var record = {
         id: record_id,
         day: this.update_day,
@@ -211,14 +217,34 @@ function _arrayLikeToArray(arr, len) {
         factoryuser_id: String(this.id)
       };
       axios.put('/api/factoryusers/factoryuser/records/' + record_id, record).then(function (res) {
-        console.log(res);
+        axios.get('/api/factoryusers/' + _this4.id).then(function (responce) {
+          console.log(responce);
+
+          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this4.update_day).getTime()) {
+            var factoryuser = {
+              factoryuser_name: _this4.factoryuser_name,
+              birthday: _this4.birthday,
+              care_level: _this4.care_level,
+              number: _this4.number,
+              day_record_check: _this4.update_day.slice(0, 10)
+            };
+            axios.put('/api/factoryusers/' + _this4.id, factoryuser).then(function (res) {
+              console.log(res);
+
+              _this4.getRecord();
+
+              _this4.update_record_value = '';
+              _this4.update_day = '';
+            });
+          }
+        });
       });
     },
     getRecord: function getRecord() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get('/api/factoryusers/' + this.id + '/records').then(function (res) {
-        _this4.factoryuser_record_data = res.data;
+        _this5.factoryuser_record_data = res.data;
         console.log(res.data);
       });
     },
@@ -237,12 +263,27 @@ function _arrayLikeToArray(arr, len) {
       this.select_day_list = dayData; //dayData配列内にstartDayからendDayまでのデータが格納され、それを空の配列内に入れ直す
     },
     destoryRecord: function destoryRecord(record_data) {
-      var _this5 = this;
+      var _this6 = this;
 
-      axios.put('/api/factoryusers/factoryuser/records/' + record_data.id).then(function (res) {
-        console.log(res);
+      axios["delete"]('/api/factoryusers/factoryuser/records/' + record_data.id).then(function () {
+        _this6.getRecord();
 
-        _this5.getRecord();
+        axios.get('/api/factoryusers/' + _this6.id).then(function (responce) {
+          if (responce.data[0].day_record_check === record_data.day.slice(0, 10)) {
+            var day_record_check_value = _this6.serchRecords.slice(-1)[0].day.slice(0, 10);
+
+            var factoryuser = {
+              factoryuser_name: _this6.factoryuser_name,
+              birthday: _this6.birthday,
+              care_level: _this6.care_level,
+              number: _this6.number,
+              day_record_check: day_record_check_value
+            };
+            axios.put('/api/factoryusers/' + _this6.id, factoryuser).then(function (res) {
+              console.log(res.data);
+            });
+          }
+        });
       });
     },
     trackDays: function trackDays(start, end) {
@@ -255,32 +296,36 @@ function _arrayLikeToArray(arr, len) {
       console.log(this.start_day + '/' + this.end_day);
     },
     postArchives: function postArchives(record) {
-      var _this6 = this;
+      var _this7 = this;
 
-      var post_archive_value = {
-        factoryuser_id: this.id,
-        factoryuser_name: 1,
-        staff_id: this.login_user_id,
-        staff_name: this.login_user.name,
-        day: record.day,
-        archive_record: record.record_value,
-        archive_memo: ''
-      };
-      var archives_post = [];
-      axios.get('/api/archives').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          archives_post.push(res.data[i]);
-        }
+      var user_name = '';
+      var user_number = '';
+      axios.get('/api/factoryusers/' + this.id).then(function (responce) {
+        console.log(responce.data[0]);
+        user_name = responce.data[0].factoryuser_name;
+        user_number = responce.data[0].number;
       }).then(function () {
-        for (var n = 0; n < archives_post.length; n++) {
-          if (archives_post[n].day.slice(0, 10) === record.day.slice(0, 10) && String(archives_post[n].factoryuser_id) === _this6.id) {
-            axios["delete"]('/api/archives/' + String(archives_post[n].id));
+        var post_archive_value = {
+          factoryuser_id: _this7.id,
+          factoryuser_name: user_name,
+          factoryuser_number: user_number,
+          staff_id: _this7.login_user_id,
+          staff_name: _this7.login_user.name,
+          day: _this7.real_date,
+          archive_record: record.record_value,
+          archive_memo: '・'
+        };
+        axios.get('/api/archives').then(function (res) {
+          for (var i = 0; i < res.data.length; i++) {
+            if (res.data[i].day.slice(0, 10) === _this7.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === _this7.id) {
+              axios["delete"]('/api/archives/' + String(res.data[i].id));
+            }
           }
-        }
 
-        ;
-      }).then(function () {
-        axios.post('/api/archives', post_archive_value);
+          ;
+        }).then(function () {
+          axios.post('/api/archives', post_archive_value);
+        });
       });
     },
     sortArray: function sortArray(array) {
@@ -340,157 +385,154 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 
-var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-  "class": "text-center"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "年齢: ")], -1
+var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", null, "記録", -1
 /* HOISTED */
 );
 
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", null, "記録", -1
-/* HOISTED */
-);
-
-var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "class": "col-4 col-form-label mb-1"
 }, "新規記録入力:", -1
 /* HOISTED */
 );
 
-var _hoisted_5 = {
+var _hoisted_4 = {
   "class": "col-8 col-lg-3 mb-3"
 };
-var _hoisted_6 = {
+var _hoisted_5 = {
   "class": "col-10 col-lg-6 mb-3"
 };
 
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "class": "col-4 col-form-label"
 }, "記録更新:", -1
 /* HOISTED */
 );
 
-var _hoisted_9 = {
+var _hoisted_8 = {
   "class": "col-8 col-lg-3 mb-3"
 };
-var _hoisted_10 = {
+var _hoisted_9 = {
   "class": "col-10 col-lg-6"
 };
 
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("br", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   lass: "col-2 col-form-label"
 }, "各月の記録抽出:", -1
 /* HOISTED */
 );
 
-var _hoisted_14 = {
+var _hoisted_13 = {
   "class": "col-6 my-2"
 };
 
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "class": "col-5 col-form-label"
 }, "日付指定記録抽出:", -1
 /* HOISTED */
 );
 
-var _hoisted_17 = {
+var _hoisted_16 = {
   "class": "col-6 mb-2"
 };
 
-var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
   "class": "m-0 p-0"
 }, "から", -1
 /* HOISTED */
 );
 
-var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   "class": "btn btn-primary px-1 mx-2"
 }, "クリア", -1
 /* HOISTED */
 );
 
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_21 = {
+var _hoisted_20 = {
   key: 0
 };
-var _hoisted_22 = {
+var _hoisted_21 = {
   key: 1
 };
-var _hoisted_23 = {
+var _hoisted_22 = {
   key: 2
 };
 
-var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_23 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "class": "col-6 col-form-label mb-1"
 }, "キーワード検索:", -1
 /* HOISTED */
 );
 
-var _hoisted_25 = {
+var _hoisted_24 = {
   "class": "col-6 mb-3"
 };
-var _hoisted_26 = {
+var _hoisted_25 = {
   id: "record_data"
 };
-var _hoisted_27 = {
-  "class": "scroll"
+var _hoisted_26 = {
+  "class": "overflow-auto",
+  style: {
+    "height": "300px"
+  }
 };
-var _hoisted_28 = {
+var _hoisted_27 = {
   "class": "space"
 };
+var _hoisted_28 = ["onClick"];
 var _hoisted_29 = ["onClick"];
 var _hoisted_30 = ["onClick"];
-var _hoisted_31 = ["onClick"];
 
-var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_33 = {
+var _hoisted_32 = {
   "class": "text-center mt-1"
 };
-var _hoisted_34 = {
+var _hoisted_33 = {
   "class": "container"
 };
-var _hoisted_35 = {
+var _hoisted_34 = {
   "class": "pagination",
   style: {
     "justify-content": "center"
   }
 };
+var _hoisted_35 = {
+  "class": "page-item"
+};
 var _hoisted_36 = {
   "class": "page-item"
 };
-var _hoisted_37 = {
+var _hoisted_37 = ["onClick"];
+var _hoisted_38 = {
   "class": "page-item"
 };
-var _hoisted_38 = ["onClick"];
 var _hoisted_39 = {
-  "class": "page-item"
-};
-var _hoisted_40 = {
   "class": "page-item"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -499,7 +541,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onMousemoveOnce: _cache[15] || (_cache[15] = function () {
       return $options.getRecord && $options.getRecord.apply($options, arguments);
     })
-  }, [_hoisted_1, _hoisted_2, _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, [_hoisted_1, _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "datetime-local",
     "class": "form-control",
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
@@ -507,7 +549,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.day]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.day]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
     "class": "form-control",
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return $data.record_value = $event;
@@ -519,7 +561,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.submit && $options.submit.apply($options, arguments);
     }),
     "class": "btn btn-primary mx-1"
-  }, "登録")]), _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, "登録")]), _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "datetime-local",
     "class": "form-control",
     "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
@@ -527,14 +569,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_day]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_day]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
     "class": "form-control",
     "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
       return $data.update_record_value = $event;
     })
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_record_value]])]), _hoisted_11]), _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.update_record_value]])]), _hoisted_10]), _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "month",
     "class": "form-control",
     "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
@@ -547,7 +589,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.getMonthData($data.select_month);
     }),
     "class": "btn btn-primary px-1"
-  }, " 表示 ")]), _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, " 表示 ")]), _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "date",
     "class": "form-control",
     "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
@@ -555,7 +597,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.dayKeywordFirst]]), _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.dayKeywordFirst]]), _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "date",
     "class": "form-control",
     "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
@@ -568,13 +610,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.trackDays($data.dayKeywordFirst, $data.dayKeywordSecond);
     }),
     "class": "btn btn-primary px-1"
-  }, " 表示 "), _hoisted_19]), _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [!$data.select_month && !$data.dayKeywordFirst && !$data.dayKeywordSecond ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.no_select_view_day) + "の記録", 1
+  }, " 表示 "), _hoisted_18]), _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [!$data.select_month && !$data.dayKeywordFirst && !$data.dayKeywordSecond ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.no_select_view_day) + "の記録", 1
   /* TEXT */
-  )])) : $data.select_month ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.select_month) + "の記録", 1
+  )])) : $data.select_month ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.select_month) + "の記録", 1
   /* TEXT */
-  )])) : $data.dayKeywordFirst && $data.dayKeywordSecond && !$data.select_month ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.dayKeywordFirst) + "から" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.dayKeywordSecond) + "までの記録", 1
+  )])) : $data.dayKeywordFirst && $data.dayKeywordSecond && !$data.select_month ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.dayKeywordFirst) + "から" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.dayKeywordSecond) + "までの記録", 1
   /* TEXT */
-  )])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  )])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     "class": "form-control",
     "onUpdate:modelValue": _cache[10] || (_cache[10] = function ($event) {
@@ -583,7 +625,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     list: "record_data"
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("datalist", _hoisted_26, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.serchRecords, function (n) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("datalist", _hoisted_25, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.keywordSerchRecords, function (n) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("option", {
       key: n
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(n.record_value), 1
@@ -591,12 +633,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     );
   }), 128
   /* KEYED_FRAGMENT */
-  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.recordArray, function (record, key) {
+  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.recordArray, function (record, key) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: key
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "日付: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.day), 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.record_value), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.record_value), 1
     /* TEXT */
     ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "登録者: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.staff_name), 1
     /* TEXT */
@@ -607,31 +649,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }
     }, " 更新 ", 8
     /* PROPS */
-    , _hoisted_29), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_28), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       "class": "col-2 col-lg-1 btn btn-primary px-0 mx-2",
       onClick: function onClick($event) {
         return $options.destoryRecord(record);
       }
     }, " 削除 ", 8
     /* PROPS */
-    , _hoisted_30), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_29), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       "class": "col-5 col-lg-2 btn btn-primary px-0",
       onClick: function onClick($event) {
         return $options.postArchives(record);
       }
     }, " 記録まとめへ追加 ", 8
     /* PROPS */
-    , _hoisted_31), _hoisted_32]);
+    , _hoisted_30), _hoisted_31]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
+  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_35, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     onClick: _cache[11] || (_cache[11] = function () {
       return $options.first && $options.first.apply($options, arguments);
     }),
     "class": "page-link"
-  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_37, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     onClick: _cache[12] || (_cache[12] = function () {
       return $options.prev && $options.prev.apply($options, arguments);
     }),
@@ -647,15 +689,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "page-link"
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(i), 9
     /* TEXT, PROPS */
-    , _hoisted_38)]);
+    , _hoisted_37)]);
   }), 128
   /* KEYED_FRAGMENT */
-  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_38, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     onClick: _cache[13] || (_cache[13] = function () {
       return $options.next && $options.next.apply($options, arguments);
     }),
     "class": "page-link"
-  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_40, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     onClick: _cache[14] || (_cache[14] = function () {
       return $options.last && $options.last.apply($options, arguments);
     }),

@@ -13,12 +13,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    login_user_id: String
+    auth_id: String
   },
   data: function data() {
     return {
       factoryusers: [],
       keyword: '',
+      floorKeyword: '',
+      serchCareLevelKeyword: '',
+      real_date: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2) + "T" + ("00" + new Date().getHours()).slice(-2) + ":" + "00",
+      //入力した日付を格納する値
+      boolean_day_record_check: false,
       //<---- ページネーション処理 ---->
       currentPage: 0,
       // 現在のページ番号
@@ -44,8 +49,9 @@ __webpack_require__.r(__webpack_exports__);
 
       for (var i in this.factoryusers) {
         var factoryuserData = this.factoryusers[i];
+        var room_number = String(factoryuserData.number).slice(0, -2);
 
-        if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1) {
+        if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 && room_number.indexOf(this.floorKeyword) !== -1 && factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1) {
           factoryuser_array.push(factoryuserData);
         }
       }
@@ -55,6 +61,9 @@ __webpack_require__.r(__webpack_exports__);
         return a.number - b.number;
       });
       return sort_factoryuser_data;
+    },
+    keywordSerchFactoryusers: function keywordSerchFactoryusers() {
+      return this.serchFactoryusers.slice(0, 5);
     },
     //ページ数を取得する
     pages: function pages() {
@@ -98,10 +107,26 @@ __webpack_require__.r(__webpack_exports__);
     getFactoryusers: function getFactoryusers() {
       var _this = this;
 
+      this.boolean_day_record_check = false;
       axios.get('/api/factoryusers').then(function (res) {
         console.log(res.data);
         _this.factoryusers = res.data;
         console.log(_this.factoryusers[1].day_record_check);
+      });
+    },
+    todayNotRegisteredRecord: function todayNotRegisteredRecord() {
+      var _this2 = this;
+
+      var array = [];
+      this.boolean_day_record_check = true;
+      axios.get('/api/factoryusers').then(function (res) {
+        for (var i = 0; i < res.data.length; i++) {
+          if (res.data[i].day_record_check !== _this2.real_date.slice(0, 10)) {
+            array.push(res.data[i]);
+          }
+        }
+
+        _this2.factoryusers = array;
       });
     },
     // 現在のページで表示するアイテムリストを取得する
@@ -137,8 +162,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   created: function created() {
     this.getFactoryusers();
-    console.log(this.login_user_id);
     console.log(this.serchFactoryusers);
+    console.log(this.auth_id);
+
+    if (this.$route.path === '/factoryusers/id') {
+      this.$router.push('/factoryusers/' + this.auth_id);
+    }
   }
 });
 
@@ -183,61 +212,75 @@ var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 var _hoisted_6 = {
   "class": "col-6 col-lg-2"
 };
-var _hoisted_7 = {
-  "class": "form-select form-select-sm"
-};
 
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
   value: ""
 }, "選択してください", -1
 /* HOISTED */
 );
 
-var _hoisted_9 = ["value"];
+var _hoisted_8 = ["value"];
 
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<label class=\"col-5 col-form-label\">要介護度: </label><div class=\"col-6 col-lg-3\"><select class=\"form-select form-select-sm\"><option value=\"\" selected=\"selected\">選択してください</option><option value=\"自立\">自立</option><option value=\"要\">要支援・要介護</option><option value=\"要支援\">要支援</option><option value=\"要介護\">要介護</option></select></div>", 2);
-
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "class": "col-5 col-form-label"
+}, "要介護度: ", -1
 /* HOISTED */
 );
 
-var _hoisted_13 = {
-  "class": "scroll-user"
+var _hoisted_10 = {
+  "class": "col-6 col-lg-3"
 };
 
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("部屋番号:");
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<option value=\"\" selected=\"selected\">選択してください</option><option value=\"自立\">自立</option><option value=\"要\">要支援・要介護</option><option value=\"要支援\">要支援</option><option value=\"要介護\">要介護</option>", 5);
 
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, ":記録登録", -1
-/* HOISTED */
-);
-
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
-/* HOISTED */
-);
-
+var _hoisted_16 = [_hoisted_11];
 var _hoisted_17 = {
-  "class": "text-center mt-1"
+  key: 0
 };
 var _hoisted_18 = {
+  key: 1
+};
+
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_20 = {
+  "class": "overflow-auto",
+  style: {
+    "height": "600px"
+  }
+};
+
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("部屋番号:");
+
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+/* HOISTED */
+);
+
+var _hoisted_23 = {
+  "class": "text-center mt-1"
+};
+var _hoisted_24 = {
   "class": "container"
 };
-var _hoisted_19 = {
+var _hoisted_25 = {
   "class": "pagination",
   style: {
     "justify-content": "center"
   }
 };
-var _hoisted_20 = {
+var _hoisted_26 = {
   "class": "page-item"
 };
-var _hoisted_21 = {
+var _hoisted_27 = {
   "class": "page-item"
 };
-var _hoisted_22 = ["onClick"];
-var _hoisted_23 = {
+var _hoisted_28 = ["onClick"];
+var _hoisted_29 = {
   "class": "page-item"
 };
-var _hoisted_24 = {
+var _hoisted_30 = {
   "class": "page-item"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -245,7 +288,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     "class": "mt-2 mx-3",
-    onMousemoveOnce: _cache[6] || (_cache[6] = function () {
+    onMousemoveOnce: _cache[9] || (_cache[9] = function () {
       return $options.getFactoryusers && $options.getFactoryusers.apply($options, arguments);
     })
   }, [_hoisted_1, _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -263,32 +306,51 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     );
   }), 256
   /* UNKEYED_FRAGMENT */
-  ))])]), _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", _hoisted_7, [_hoisted_8, ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(['1F', '2F', '3F', '4F', '5F', '6F', '7F', '8F', '9F', '10F'], function (n) {
+  ))])]), _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "class": "form-select form-select-sm",
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+      return $data.floorKeyword = $event;
+    })
+  }, [_hoisted_7, ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(['1F', '2F', '3F', '4F', '5F', '6F', '7F', '8F', '9F', '10F'], function (n) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
       key: n,
-      value: n
+      value: n.slice(0, -1)
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(n), 9
     /* TEXT, PROPS */
-    , _hoisted_9);
+    , _hoisted_8);
   }), 64
   /* STABLE_FRAGMENT */
-  ))])]), _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[1] || (_cache[1] = function () {
-      return _ctx.todayNotRegisteredRecord && _ctx.todayNotRegisteredRecord.apply(_ctx, arguments);
+  ))], 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.floorKeyword]])]), _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "class": "form-select form-select-sm",
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return $data.serchCareLevelKeyword = $event;
+    })
+  }, _hoisted_16, 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.serchCareLevelKeyword]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [$data.boolean_day_record_check === false ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[3] || (_cache[3] = function () {
+      return $options.todayNotRegisteredRecord && $options.todayNotRegisteredRecord.apply($options, arguments);
     }),
-    "class": "btn btn-warning mt-2"
+    "class": "btn btn-primary mt-2"
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.today) + " 記録未登録者 ", 1
   /* TEXT */
-  )]), _hoisted_12]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.factoryusersArray, function (user, key) {
+  )])) : $data.boolean_day_record_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[4] || (_cache[4] = function () {
+      return $options.getFactoryusers && $options.getFactoryusers.apply($options, arguments);
+    }),
+    "class": "btn btn-warning mt-2"
+  }, " 戻る ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_19]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.factoryusersArray, function (user, key) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: key
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, " 名前: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.factoryuser_name) + " > ", 1
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, " 名前: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.factoryuser_name), 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
-      to: '/factoryusers/' + $props.login_user_id + '/' + user.id
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
+      to: '/factoryusers/' + $props.auth_id + '/' + user.id + '/records'
     }, {
       "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-        return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.number), 1
+        return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(String(user.number).slice(0, -1)), 1
         /* TEXT */
         )];
       }),
@@ -299,20 +361,20 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     /* PROPS, DYNAMIC_SLOTS */
     , ["to"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "要介護度: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.care_level), 1
     /* TEXT */
-    ), _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.day_record_check), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "最終記録登録日:" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(user.day_record_check), 1
     /* TEXT */
-    ), _hoisted_16])]);
+    ), _hoisted_22])]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
+  ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[2] || (_cache[2] = function () {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[5] || (_cache[5] = function () {
       return $options.first && $options.first.apply($options, arguments);
     }),
     "class": "page-link"
-  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[3] || (_cache[3] = function () {
+  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[6] || (_cache[6] = function () {
       return $options.prev && $options.prev.apply($options, arguments);
     }),
     "class": "page-link"
@@ -327,16 +389,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "page-link"
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(i), 9
     /* TEXT, PROPS */
-    , _hoisted_22)]);
+    , _hoisted_28)]);
   }), 128
   /* KEYED_FRAGMENT */
-  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[4] || (_cache[4] = function () {
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[7] || (_cache[7] = function () {
       return $options.next && $options.next.apply($options, arguments);
     }),
     "class": "page-link"
-  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[5] || (_cache[5] = function () {
+  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_30, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[8] || (_cache[8] = function () {
       return $options.last && $options.last.apply($options, arguments);
     }),
     "class": "page-link"

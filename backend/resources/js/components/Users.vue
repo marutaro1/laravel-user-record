@@ -10,7 +10,7 @@
         list="factoryuser_data"
       />
       <datalist id="factoryuser_data">
-        <option v-for="n in factoryusers">
+        <option v-for="n in serchFactoryusers">
           {{n.factoryuser_name}}
         </option>
       </datalist>
@@ -18,7 +18,7 @@
 
     <label class="col-5 col-form-label">フロア検索: </label>
     <div class="col-6 col-lg-2">
-      <select class="form-select form-select-sm">
+      <select class="form-select form-select-sm" v-model="floorKeyword">
         <option value="">選択してください</option>
         <option
           v-for="n in [
@@ -34,7 +34,7 @@
             '10F',
           ]"
           :key="n"
-          :value="n"
+          :value="n.slice(0, -1)"
         >
           {{ n }}
         </option>
@@ -44,8 +44,8 @@
     <label class="col-5 col-form-label">要介護度: </label>
     <div class="col-6 col-lg-3">
       <select
-       
         class="form-select form-select-sm"
+        v-model="serchCareLevelKeyword"
       >
         <option value="" selected="selected">選択してください</option>
         <option value="自立">自立</option>
@@ -56,25 +56,28 @@
     </div>
 
     <div>
-      <div>
-        <button @click="todayNotRegisteredRecord" class="btn btn-warning mt-2">
+      <div v-if="boolean_day_record_check === false">
+        <button @click="todayNotRegisteredRecord" class="btn btn-primary mt-2">
           {{ today }} 記録未登録者
+        </button>
+      </div>
+      <div v-else-if="boolean_day_record_check === true">
+        <button @click="getFactoryusers" class="btn btn-warning mt-2">
+          戻る
         </button>
       </div>
     <hr />
     </div>
 
-    <div class="scroll-user">
+    <div class="overflow-auto" style="height:600px;">
       <div v-for="(user, key) in factoryusersArray" :key="key">
         <div>
           <p>
             名前: {{user.factoryuser_name}}
-            >
           </p>
-          <p>部屋番号:<router-link :to="'/factoryusers/' + login_user_id + '/' + user.id">{{user.number}}</router-link> </p>
+          <p>部屋番号:<router-link :to="'/factoryusers/' + auth_id + '/' + user.id + '/records'">{{ String(user.number).slice(0, -1) }}</router-link> </p>
           <p>要介護度: {{user.care_level}}</p>
-          <p>:記録登録</p>
-          <div>{{user.day_record_check}}</div>
+          <p>最終記録登録日:{{user.day_record_check}}</p>
           <hr />
         </div>
       </div>
@@ -113,12 +116,24 @@
 <script>
   export default {
     props: {
-      login_user_id: String
+      auth_id: String
     },
     data() {
       return {
         factoryusers: [],
         keyword: '',
+        floorKeyword: '',
+        serchCareLevelKeyword: '',
+        real_date: new Date().getFullYear() +
+                        "-" +
+                        ("00" + (new Date().getMonth() + 1)).slice(-2) +
+                        "-" +
+                        ("00" + new Date().getDate()).slice(-2) +
+                        "T" +
+                        ("00" + new Date().getHours()).slice(-2) +
+                        ":" +
+                        "00", //入力した日付を格納する値
+        boolean_day_record_check: false,  
         //<---- ページネーション処理 ---->
             currentPage: 0, // 現在のページ番号
             size: 10, // 1ページに表示するアイテムの上限
@@ -140,7 +155,11 @@
                   const factoryuser_array  = [];
                   for (let i in this.factoryusers) {
                     const factoryuserData = this.factoryusers[i];
-                    if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1)  {
+                    const room_number = String(factoryuserData.number).slice(0, -2);
+                    if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 &&
+                        room_number.indexOf(this.floorKeyword) !== -1 &&
+                        factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1
+                    )  {
                       factoryuser_array.push(factoryuserData);
                     }
                   };
@@ -150,6 +169,10 @@
                    });
 
                 return sort_factoryuser_data;
+             },
+
+              keywordSerchFactoryusers() {
+               return this.serchFactoryusers.slice(0, 5);
              },
 
               //ページ数を取得する
@@ -191,11 +214,25 @@
      },
     methods: {
       getFactoryusers() {
+        this.boolean_day_record_check = false;
         axios.get('/api/factoryusers').then((res) => {
           console.log(res.data);
           this.factoryusers = res.data;
           console.log(this.factoryusers[1].day_record_check);
         });
+      },
+
+      todayNotRegisteredRecord() {
+            const array = [];
+            this.boolean_day_record_check = true;
+            axios.get('/api/factoryusers').then((res) => {
+              for(let i = 0; i <res.data.length; i++) {
+                if(res.data[i].day_record_check !== this.real_date.slice(0, 10)) {
+                  array.push(res.data[i]);
+                }
+              }
+              this.factoryusers = array;
+            });
       },
 
            // 現在のページで表示するアイテムリストを取得する
@@ -234,12 +271,16 @@
             pageSelect(index) {
               this.currentPage = index - 1;
             },
+
     },
 
     created() {
       this.getFactoryusers();
-      console.log(this.login_user_id);
       console.log(this.serchFactoryusers);
+      console.log(this.auth_id)
+      if(this.$route.path === '/factoryusers/id') {
+        this.$router.push('/factoryusers/' + this.auth_id);
+      }
     },
   }
 </script>

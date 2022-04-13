@@ -12,6 +12,7 @@ class Archive extends Model
     protected $fillable = [
         'factoryuser_id',
         'factoryuser_name',
+        'factoryuser_number',
         'staff_id',
         'staff_name',
         'day',

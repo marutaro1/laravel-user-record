@@ -9,7 +9,7 @@
       <label class="col-6 col-form-label">部署:</label>
       <div class="col-6 col-lg-2 mb-2">
         <select class="form-select form-select-sm" v-model="user_department">
-          <option value="">選択してください</option>
+          <option value=null>選択してください</option>
           <option value="caregiver">介護</option>
           <option value="nurse">看護</option>
           <option value="rehabilitation">リハビリ</option>
@@ -22,10 +22,11 @@
         業務登録
       </button>
     </div>
-    <div v-if="open_staff_method">
+  
+    <div v-if="open_staff_method && login_user.user_department === user_department && login_user.user_offitial_position !== '' || open_staff_method && user_department === 'studentSupport' ">
       <button class="btn btn-warning py-0" @click="closeStaffData">×</button>
     </div>
-    <div v-if="open_staff_method">
+    <div v-if="open_staff_method && login_user.user_department === user_department && login_user.user_offitial_position !== '' || open_staff_method && user_department === 'studentSupport' ">
       <div>
         <label class="col-4 col-form-label">新規業務登録</label>
         <div class="col-6 col-lg-3">
@@ -178,12 +179,13 @@
     },
     data() {
       return {
+        login_user: [],
         today: new Date().getFullYear() +
              "-" +
              ("00" + (new Date().getMonth() + 1)).slice(-2) + 
              "-" +
-             ("00" + (new Date().getDate() + 1)).slice(-2),
-        user_department: '',
+             ("00" + (new Date().getDate())).slice(-2),
+        user_department: null,
         open_staff_method: false,
         week: '',
         select_staff_name: [],
@@ -286,5 +288,11 @@
 
       
     },
+    created() {
+      axios.get('/api/users/' + this.login_user_id).then((res) => {
+        console.log(res.data);
+        this.login_user = res.data;
+      })
+    }
 }
 </script>

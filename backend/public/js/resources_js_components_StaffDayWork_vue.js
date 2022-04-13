@@ -17,8 +17,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      today: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + (new Date().getDate() + 1)).slice(-2),
-      user_department: '',
+      login_user: [],
+      today: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2),
+      user_department: null,
       open_staff_method: false,
       week: '',
       select_staff_name: [],
@@ -129,6 +130,14 @@ __webpack_require__.r(__webpack_exports__);
 
       ;
     }
+  },
+  created: function created() {
+    var _this4 = this;
+
+    axios.get('/api/users/' + this.login_user_id).then(function (res) {
+      console.log(res.data);
+      _this4.login_user = res.data;
+    });
   }
 });
 
@@ -174,7 +183,7 @@ var _hoisted_6 = {
   "class": "col-6 col-lg-2 mb-2"
 };
 
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<option value=\"\">選択してください</option><option value=\"caregiver\">介護</option><option value=\"nurse\">看護</option><option value=\"rehabilitation\">リハビリ</option><option value=\"studentSupport\">施設管理</option>", 5);
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<option value=\"null\">選択してください</option><option value=\"caregiver\">介護</option><option value=\"nurse\">看護</option><option value=\"rehabilitation\">リハビリ</option><option value=\"studentSupport\">施設管理</option>", 5);
 
 var _hoisted_12 = [_hoisted_7];
 var _hoisted_13 = {
@@ -328,12 +337,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.getStaffName && $options.getStaffName.apply($options, arguments);
     }),
     "class": "mt-2 btn btn-warning"
-  }, " 業務登録 ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, " 業務登録 ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method && $data.login_user.user_department === $data.user_department && $data.login_user.user_offitial_position !== '' || $data.open_staff_method && $data.user_department === 'studentSupport' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": "btn btn-warning py-0",
     onClick: _cache[3] || (_cache[3] = function () {
       return $options.closeStaffData && $options.closeStaffData.apply($options, arguments);
     })
-  }, "×")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+  }, "×")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method && $data.login_user.user_department === $data.user_department && $data.login_user.user_offitial_position !== '' || $data.open_staff_method && $data.user_department === 'studentSupport' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "class": "form-select form-select-sm mb-2",
     "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
       return $data.week = $event;
