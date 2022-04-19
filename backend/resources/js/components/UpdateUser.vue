@@ -1,7 +1,6 @@
 <template>
   <div class="mt-2" @mousemove.once="addUserNumber">
     <hr />
-  {{number}}
     <h4>利用者情報更新</h4>
 
     <label class="col-4 col-form-label">部屋番号:</label>
@@ -62,7 +61,7 @@
           updateUser() {
             axios.get('/api/factoryusers/' + this.id).then((res) => {
               const factoryuser = {
-                number: Number(this.updateNumber + this.updateAddNumber),
+                number: Number(this.update_number + this.update_add_number),
                 factoryuser_name: res.data.name,
                 care_level: this.update_care_level,
                 birthday: res.data.birthday,

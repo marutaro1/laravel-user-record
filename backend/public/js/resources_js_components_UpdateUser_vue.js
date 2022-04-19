@@ -31,7 +31,7 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get('/api/factoryusers/' + this.id).then(function (res) {
         var factoryuser = {
-          number: Number(_this.updateNumber + _this.updateAddNumber),
+          number: Number(_this.update_number + _this.update_add_number),
           factoryuser_name: res.data.name,
           care_level: _this.update_care_level,
           birthday: res.data.birthday
@@ -130,9 +130,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onMousemoveOnce: _cache[4] || (_cache[4] = function () {
       return $options.addUserNumber && $options.addUserNumber.apply($options, arguments);
     })
-  }, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.number) + " ", 1
-  /* TEXT */
-  ), _hoisted_2, _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, [_hoisted_1, _hoisted_2, _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "number",
     "class": "form-control",
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {

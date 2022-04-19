@@ -111,7 +111,6 @@ __webpack_require__.r(__webpack_exports__);
       axios.get('/api/factoryusers').then(function (res) {
         console.log(res.data);
         _this.factoryusers = res.data;
-        console.log(_this.factoryusers[1].day_record_check);
       });
     },
     todayNotRegisteredRecord: function todayNotRegisteredRecord() {

@@ -218,7 +218,7 @@
         axios.get('/api/factoryusers').then((res) => {
           console.log(res.data);
           this.factoryusers = res.data;
-          console.log(this.factoryusers[1].day_record_check);
+         
         });
       },
 
