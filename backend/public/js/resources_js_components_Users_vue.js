@@ -13,7 +13,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    auth_id: String
+    auth_id: Number
   },
   data: function data() {
     return {
@@ -333,7 +333,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.todayNotRegisteredRecord && $options.todayNotRegisteredRecord.apply($options, arguments);
     }),
     "class": "btn btn-primary mt-2"
-  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.today) + " 記録未登録者 ", 1
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.real_date.slice(0, 10)) + " 記録未登録者 ", 1
   /* TEXT */
   )])) : $data.boolean_day_record_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     onClick: _cache[4] || (_cache[4] = function () {

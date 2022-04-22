@@ -15,7 +15,7 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     id: String,
     login_user_id: String,
-    number: String
+    number: Number
   },
   data: function data() {
     return {
