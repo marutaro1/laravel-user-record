@@ -9,13 +9,25 @@ use Illuminate\Http\Request;
 
 class RecordController extends Controller
 {
-    public function index($id) 
+    public function index($id, $day, $day_end) 
     {
-        $factoryuser_records = Record::select('records.*')
-        ->where('factoryuser_id', '=', $id)
-        ->whereNull('deleted_at')
-        ->get();
-        return $factoryuser_records;
+        // $factoryuser_records = Record::select('records.*')
+        // ->where('factoryuser_id', '=', $id)
+        // ->whereNull('deleted_at')
+        // ->get();
+        // return $factoryuser_records;
+
+        if(isset($id)) {
+            $query = Record::query()
+            ->where('factoryuser_id', '=', $id)
+            ->where('day', '>=', $day)
+            ->where('day', '<', $day_end)
+            ->orderBy('day','desc');
+        }
+
+        $record = $query->get();
+
+        return $record;
     }
 
     public function store(Request $request) 
@@ -30,6 +42,22 @@ class RecordController extends Controller
         // $record_id = Record::insertGetId(['id' => $record_find]);
         // UserIntermediaValue::insert(['factoryuser_id' => $factoryuser_id, 'record_id' => $record_id]);
         return Record::find($record['id']);
+    }
+
+    public function serch($id, $record_keyword, $day, $day_end) {
+
+        if(isset($id)) {
+            $query = Record::query()
+            ->where('factoryuser_id', '=', $id)
+            ->where('record_value', 'like', "%{$record_keyword}%")
+            ->where('day', '>=', $day)
+            ->where('day', '<', $day_end)
+            ->orderBy('day','desc');
+        }
+
+        $record = $query->get();
+
+        return $record;
     }
 
     public function update(Request $request, $id)

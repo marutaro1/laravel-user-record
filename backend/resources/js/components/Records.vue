@@ -34,7 +34,7 @@
         <input type="month" class="form-control" v-model="select_month" />
       </div>
       <button
-       @click="getMonthData(select_month)"
+       @click="getRecord"
         class="btn btn-primary px-1"
       >
        表示
@@ -51,7 +51,7 @@
         <p class="m-0 p-0">から</p>
         <input type="date" class="form-control" v-model="dayKeywordSecond" />
       </div>
-      <button @click="trackDays(dayKeywordFirst, dayKeywordSecond)" class="btn btn-primary px-1">
+      <button @click="getRecord" class="btn btn-primary px-1">
        表示
       </button>
       <button class="btn btn-primary px-1 mx-2">クリア</button>
@@ -78,12 +78,9 @@
           v-model="keyword"
           list="record_data"
         />
-         <datalist id="record_data">
-            <option v-for="n in keywordSerchRecords" :key="n">
-            {{ n.record_value }}
-            </option>
-        </datalist>
       </div>
+
+      <button @click="recordSerch">検索</button>
 
       <div class="overflow-auto" style="height:300px;">
         <div v-for="(record,key) in recordArray" :key="key">
@@ -190,6 +187,7 @@
                         "-" +
                         ("00" + (new Date().getMonth() + 1)).slice(-2),
              login_user: [],
+             serch_responce: [],
 
              //<---- ページネーション処理 ---->
             currentPage: 0, // 現在のページ番号
@@ -204,37 +202,11 @@
          },
 
          computed: {
-              serchRecords() {
-                const record_data  = [];
-                for (let i in this.factoryuser_record_data) {
-                  const recordData = this.factoryuser_record_data[i];
-                  if (recordData.record_value.indexOf(this.keyword) !== -1)  {
-                    record_data.push(recordData);
-                  }
-                };
 
-               const day_select_record_data = record_data.filter(rec => {
-                    this.getSelectDay(this.start_day, this.end_day);
-                    let custom_includes = (arr, target) => arr.some(el => target.includes(el));
-                    //独自関数
-                    return custom_includes(this.select_day_list, rec.day);
-                  });
-
-                  const sort_record_data = day_select_record_data.slice()
-                  .sort((a, b) => {
-                    return Number(new Date(a.day)) - Number(new Date(b.day));
-                   })
-                  .reverse();
-
-                return sort_record_data;
-             },
-
-             keywordSerchRecords() {
-               return this.serchRecords.slice(0, 5)
-             },
 
             recordArray() {
-              this.displayItems(this.serchRecords);
+              //this.displayItems(this.serchRecords);
+              this.displayItems(this.serch_responce);
                 return this.arrayData;
               },
              //ページ数を取得する
@@ -297,7 +269,7 @@
 
                 axios.get('/api/factoryusers/' + this.id).then((responce) => {
                   console.log(responce)
-                  if( new Date( responce.data[0].day_record_check + 'T00:00' ).getTime() <= new Date ( this.day ).getTime() || responce.data[0].day_record_check === '・') {
+                  if( new Date( responce.data[0].day_record_check + 'T00:00' ).getTime() <= new Date ( this.day ).getTime() || responce.data[0].day_record_check === '・' || responce.data[0].day_record_check === '.') {
                     const factoryuser = {
                       factoryuser_name: this.factoryuser_name,
                       birthday: this.birthday,
@@ -352,39 +324,88 @@
            },
 
            getRecord() {
-             axios.get('/api/factoryusers/' + this.id + '/records').then((res) => {
-               this.factoryuser_record_data = res.data;
-               console.log(res.data);
-             });
+              if(this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
+                const day_first = this.real_date.slice(0,7);
+                this.start_day =  day_first + '-01'
+                if(Number(day_first.slice(6,7))+ 1 < 10) {
+                  this.end_day = day_first.slice(0,5) + 0 + String(Number(day_first.slice(6,7))+ 1).slice(-1)  + '-01'
+                }
+                else if (Number(day_first.slice(6,7))+ 1 >= 10) {
+                    this.end_day = day_first.slice(0,5) + Number(day_first.slice(6,7))+ 1  + '-01'
+                }
+              }
+              else if(this.select_month !== '') {
+                 
+                this.start_day =  this.select_month + '-01'
+                if(Number(this.start_day.slice(6,7))+ 1 < 10) {
+                  this.end_day = this.start_day.slice(0,5) + 0 + String(Number(this.start_day.slice(6,7))+ 1).slice(-1)  + '-01'
+                }
+                else if (Number(this.start_day.slice(6,7))+ 1 >= 10) {
+                    this.end_day = this.start_day.slice(0,5) + Number(this.start_day.slice(6,7))+ 1  + '-01'
+                }
+              }
+              else if(this.dayKeywordFirst !== '' && this.dayKeywordSecond !== '') {
+                    this.start_day = this.dayKeywordFirst;
+                    const number_end_day = new Date(this.dayKeywordSecond + 'T00:00:00');
+                    let next_month = '';
+                    let next_day = '';
+                    let year = this.dayKeywordSecond.slice(0,4);
+
+                    if(number_end_day.getMonth() + 1 < 10) {
+                      next_month = (0 +  String(number_end_day.getMonth() + 1));
+                      console.log(1)
+                    }
+                    else if (number_end_day.getMonth()+ 1 === 12 && number_end_day.getDate() + 1 === 32) {
+                      year = String(Number(year) + 1);
+                      next_month = '01';
+                      next_day = '01';
+                      console.log(2)
+                    }
+                    else if (number_end_day.getMonth()+ 1 >= 10 && number_end_day.getMonth()+ 1 < 13) {
+                      next_month = String(number_end_day.getMonth() + 1);
+                      console.log(3)
+                    }
+
+                    if (number_end_day.getMonth()+ 1 === 12 && number_end_day.getDate() + 1 === 32) {
+                      console.log(4)
+                    }
+                    else if(number_end_day.getDate()+ 1 < 10) {
+                      next_day = 0 +  String(number_end_day.getDate() + 1);
+                      console.log(5)
+                    }
+                    else if (number_end_day.getDate() + 1 === 32 && number_end_day.getMonth() + 1 !== 12) {
+                      next_month = String(number_end_day.getMonth() + 2);
+                      next_day = '01';
+                      console.log(6)
+                    }
+                    else if (number_end_day.getDate() + 1 >= 10 && number_end_day.getDate() + 1 < 32) {
+                      next_day = String(0 +  number_end_day.getDate() + 1);
+                      console.log(7)
+                    }
+
+                    this.end_day = year + '-' + next_month + '-' + next_day;
+                  }
+                  console.log(this.start_day + '/' + this.end_day)
+                     axios.get('/api/factoryusers/' + this.id + '/records/' + this.start_day + '/' + this.end_day).then((res) => {
+                        this.serch_responce = res.data;
+                        console.log(res.data);
+                     });
            },
 
-           getSelectDay(start, end) {
-            let dayData = []
-                //startDayからendDayまでの日付を入れる配列
-                const startDate = new Date(start)
-                const endDate = new Date(end)
-                while (startDate < endDate) {
-                    dayData = [...dayData, 
-                        startDate.getFullYear()  +  '-' +("00" + (startDate.getMonth() + 1)).slice(-2)+ '-' + ("00" + (startDate.getDate())).slice(-2)]
-                        startDate.setDate(startDate.getDate() + 1)
-                        //startDayをdayData配列の中に入れ、+1日してwhileでendDayまでのループを回す
-                        
-                    }    
-                    dayData = [...dayData, endDate.getFullYear() + '-' +("00" + (endDate.getMonth() + 1)).slice(-2)+ '-' + ("00" + (endDate.getDate())).slice(-2)]
-                    this.select_day_list = dayData;       
-                    //dayData配列内にstartDayからendDayまでのデータが格納され、それを空の配列内に入れ直す
-           },
 
            destoryRecord(record_data) {
              axios.delete('/api/factoryusers/factoryuser/records/' + record_data.id).then(() => {
                 this.getRecord();
 
                 axios.get('/api/factoryusers/' + this.id).then((responce) => {
-
+                  console.log(responce)
+                  console.log(record_data)
                   if( responce.data[0].day_record_check === record_data.day.slice(0,10) ) {
+                    console.log(this.serch_responce)
                     
-                      const day_record_check_value = this.serchRecords.slice(-1)[0].day.slice(0,10);
-               
+                      const day_record_check_value = this.serch_responce[1].day.slice(0,10);
+                      console.log(day_record_check_value)
+
                       const factoryuser = {
                         factoryuser_name: this.factoryuser_name,
                         birthday: this.birthday,
@@ -401,17 +422,7 @@
              })
            },
 
-           trackDays(start, end) {
-             this.start_day = start;
-             this.end_day = end;
-
-           },
-           getMonthData(day) {
-             this.start_day = day + '-01'
-             this.end_day = day + '-31'
-             console.log(this.start_day + '/' + this.end_day)
-           },
-
+           
            postArchives(record) {
              let user_name = '';
              let user_number = '';
@@ -453,6 +464,67 @@
                   return Number(new Date(a.day)) - Number(new Date(b.day));
                 })
                 .reverse();
+            },
+
+            //サーチ用のコントローラを作成し使用
+            recordSerch() {
+              if(this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
+                const day_first = this.real_date.slice(0,7);
+                this.start_day =  day_first + '-01'
+                if(Number(day_first.slice(6,7))+ 1 < 10) {
+                  this.end_day = day_first.slice(0,5) + 0 + String(Number(day_first.slice(6,7))+ 1).slice(-1)  + '-01'
+                }
+                else if (Number(day_first.slice(6,7))+ 1 >= 10) {
+                    this.end_day = day_first.slice(0,5) + Number(day_first.slice(6,7))+ 1  + '-01'
+                }
+              }
+              else if(this.dayKeywordFirst !== '' && this.dayKeywordSecond !== '') {
+                    const number_end_day = new Date(this.dayKeywordSecond + 'T00:00:00');
+                    let next_month = '';
+                    let next_day = '';
+                    let year = this.dayKeywordSecond.slice(0,4);
+
+                    if(number_end_day.getMonth() + 1 < 10) {
+                      next_month = (0 +  String(number_end_day.getMonth() + 1));
+                      console.log(1)
+                    }
+                    else if (number_end_day.getMonth()+ 1 === 12 && number_end_day.getDate() + 1 === 32) {
+                      year = String(Number(year) + 1);
+                      next_month = '01';
+                      next_day = '01';
+                      console.log(2)
+                    }
+                    else if (number_end_day.getMonth()+ 1 >= 10 && number_end_day.getMonth()+ 1 < 13) {
+                      next_month = String(number_end_day.getMonth() + 1);
+                      console.log(3)
+                    }
+
+                    if (number_end_day.getMonth()+ 1 === 12 && number_end_day.getDate() + 1 === 32) {
+                      console.log(4)
+                    }
+                    else if(number_end_day.getDate()+ 1 < 10) {
+                      next_day = 0 +  String(number_end_day.getDate() + 1);
+                      console.log(5)
+                    }
+                    else if (number_end_day.getDate() + 1 === 32 && number_end_day.getMonth() + 1 !== 12) {
+                      next_month = String(number_end_day.getMonth() + 2);
+                      next_day = '01';
+                      console.log(6)
+                    }
+                    else if (number_end_day.getDate() + 1 >= 10 && number_end_day.getDate() + 1 < 32) {
+                      next_day = String(0 +  number_end_day.getDate() + 1);
+                      console.log(7)
+                    }
+
+                    this.end_day = year + '-' + next_month + '-' + next_day;
+              }
+        
+
+              console.log(this.start_day)
+              console.log(this.end_day)
+              axios.get('/api/' + this.id + '/serch/' + this.keyword + '/' + this.start_day + '/' + this.end_day).then((res) => {
+                this.serch_responce = res.data;
+              })
             },
 
            // 現在のページで表示するアイテムリストを取得する

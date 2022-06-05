@@ -11,41 +11,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-}
-
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-}
-
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-}
-
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-}
-
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     id: String,
@@ -70,6 +35,7 @@ function _arrayLikeToArray(arr, len) {
       select_month: '',
       no_select_view_day: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2),
       login_user: [],
+      serch_responce: [],
       //<---- ページネーション処理 ---->
       currentPage: 0,
       // 現在のページ番号
@@ -86,42 +52,9 @@ function _arrayLikeToArray(arr, len) {
     };
   },
   computed: {
-    serchRecords: function serchRecords() {
-      var _this = this;
-
-      var record_data = [];
-
-      for (var i in this.factoryuser_record_data) {
-        var recordData = this.factoryuser_record_data[i];
-
-        if (recordData.record_value.indexOf(this.keyword) !== -1) {
-          record_data.push(recordData);
-        }
-      }
-
-      ;
-      var day_select_record_data = record_data.filter(function (rec) {
-        _this.getSelectDay(_this.start_day, _this.end_day);
-
-        var custom_includes = function custom_includes(arr, target) {
-          return arr.some(function (el) {
-            return target.includes(el);
-          });
-        }; //独自関数
-
-
-        return custom_includes(_this.select_day_list, rec.day);
-      });
-      var sort_record_data = day_select_record_data.slice().sort(function (a, b) {
-        return Number(new Date(a.day)) - Number(new Date(b.day));
-      }).reverse();
-      return sort_record_data;
-    },
-    keywordSerchRecords: function keywordSerchRecords() {
-      return this.serchRecords.slice(0, 5);
-    },
     recordArray: function recordArray() {
-      this.displayItems(this.serchRecords);
+      //this.displayItems(this.serchRecords);
+      this.displayItems(this.serch_responce);
       return this.arrayData;
     },
     //ページ数を取得する
@@ -164,15 +97,15 @@ function _arrayLikeToArray(arr, len) {
   },
   methods: {
     getLoginUser: function getLoginUser() {
-      var _this2 = this;
+      var _this = this;
 
       axios.get('/api/users/' + this.login_user_id).then(function (res) {
-        _this2.login_user = res.data;
-        return _this2.login_user;
+        _this.login_user = res.data;
+        return _this.login_user;
       });
     },
     submit: function submit() {
-      var _this3 = this;
+      var _this2 = this;
 
       var record_data = {
         day: this.day,
@@ -182,31 +115,31 @@ function _arrayLikeToArray(arr, len) {
         factoryuser_id: this.id
       };
       axios.post('/api/factoryusers/' + this.id + '/records', record_data).then(function (res) {
-        axios.get('/api/factoryusers/' + _this3.id).then(function (responce) {
+        axios.get('/api/factoryusers/' + _this2.id).then(function (responce) {
           console.log(responce);
 
-          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this3.day).getTime() || responce.data[0].day_record_check === '・') {
+          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this2.day).getTime() || responce.data[0].day_record_check === '・' || responce.data[0].day_record_check === '.') {
             var factoryuser = {
-              factoryuser_name: _this3.factoryuser_name,
-              birthday: _this3.birthday,
-              care_level: _this3.care_level,
-              number: _this3.number,
-              day_record_check: _this3.day.slice(0, 10)
+              factoryuser_name: _this2.factoryuser_name,
+              birthday: _this2.birthday,
+              care_level: _this2.care_level,
+              number: _this2.number,
+              day_record_check: _this2.day.slice(0, 10)
             };
-            axios.put('/api/factoryusers/' + _this3.id, factoryuser).then(function (res) {
+            axios.put('/api/factoryusers/' + _this2.id, factoryuser).then(function (res) {
               console.log(res);
 
-              _this3.getRecord();
+              _this2.getRecord();
 
-              _this3.record_value = '';
-              _this3.day = _this3.real_date;
+              _this2.record_value = '';
+              _this2.day = _this2.real_date;
             });
           }
         });
       });
     },
     updateRecord: function updateRecord(record_id) {
-      var _this4 = this;
+      var _this3 = this;
 
       var record = {
         id: record_id,
@@ -217,86 +150,124 @@ function _arrayLikeToArray(arr, len) {
         factoryuser_id: String(this.id)
       };
       axios.put('/api/factoryusers/factoryuser/records/' + record_id, record).then(function (res) {
-        axios.get('/api/factoryusers/' + _this4.id).then(function (responce) {
+        axios.get('/api/factoryusers/' + _this3.id).then(function (responce) {
           console.log(responce);
 
-          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this4.update_day).getTime()) {
+          if (new Date(responce.data[0].day_record_check + 'T00:00').getTime() <= new Date(_this3.update_day).getTime()) {
             var factoryuser = {
-              factoryuser_name: _this4.factoryuser_name,
-              birthday: _this4.birthday,
-              care_level: _this4.care_level,
-              number: _this4.number,
-              day_record_check: _this4.update_day.slice(0, 10)
+              factoryuser_name: _this3.factoryuser_name,
+              birthday: _this3.birthday,
+              care_level: _this3.care_level,
+              number: _this3.number,
+              day_record_check: _this3.update_day.slice(0, 10)
             };
-            axios.put('/api/factoryusers/' + _this4.id, factoryuser).then(function (res) {
+            axios.put('/api/factoryusers/' + _this3.id, factoryuser).then(function (res) {
               console.log(res);
 
-              _this4.getRecord();
+              _this3.getRecord();
 
-              _this4.update_record_value = '';
-              _this4.update_day = '';
+              _this3.update_record_value = '';
+              _this3.update_day = '';
             });
           }
         });
       });
     },
     getRecord: function getRecord() {
-      var _this5 = this;
+      var _this4 = this;
 
-      axios.get('/api/factoryusers/' + this.id + '/records').then(function (res) {
-        _this5.factoryuser_record_data = res.data;
+      if (this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
+        var day_first = this.real_date.slice(0, 7);
+        this.start_day = day_first + '-01';
+
+        if (Number(day_first.slice(6, 7)) + 1 < 10) {
+          this.end_day = day_first.slice(0, 5) + 0 + String(Number(day_first.slice(6, 7)) + 1).slice(-1) + '-01';
+        } else if (Number(day_first.slice(6, 7)) + 1 >= 10) {
+          this.end_day = day_first.slice(0, 5) + Number(day_first.slice(6, 7)) + 1 + '-01';
+        }
+      } else if (this.select_month !== '') {
+        this.start_day = this.select_month + '-01';
+
+        if (Number(this.start_day.slice(6, 7)) + 1 < 10) {
+          this.end_day = this.start_day.slice(0, 5) + 0 + String(Number(this.start_day.slice(6, 7)) + 1).slice(-1) + '-01';
+        } else if (Number(this.start_day.slice(6, 7)) + 1 >= 10) {
+          this.end_day = this.start_day.slice(0, 5) + Number(this.start_day.slice(6, 7)) + 1 + '-01';
+        }
+      } else if (this.dayKeywordFirst !== '' && this.dayKeywordSecond !== '') {
+        this.start_day = this.dayKeywordFirst;
+        var number_end_day = new Date(this.dayKeywordSecond + 'T00:00:00');
+        var next_month = '';
+        var next_day = '';
+        var year = this.dayKeywordSecond.slice(0, 4);
+
+        if (number_end_day.getMonth() + 1 < 10) {
+          next_month = 0 + String(number_end_day.getMonth() + 1);
+          console.log(1);
+        } else if (number_end_day.getMonth() + 1 === 12 && number_end_day.getDate() + 1 === 32) {
+          year = String(Number(year) + 1);
+          next_month = '01';
+          next_day = '01';
+          console.log(2);
+        } else if (number_end_day.getMonth() + 1 >= 10 && number_end_day.getMonth() + 1 < 13) {
+          next_month = String(number_end_day.getMonth() + 1);
+          console.log(3);
+        }
+
+        if (number_end_day.getMonth() + 1 === 12 && number_end_day.getDate() + 1 === 32) {
+          console.log(4);
+        } else if (number_end_day.getDate() + 1 < 10) {
+          next_day = 0 + String(number_end_day.getDate() + 1);
+          console.log(5);
+        } else if (number_end_day.getDate() + 1 === 32 && number_end_day.getMonth() + 1 !== 12) {
+          next_month = String(number_end_day.getMonth() + 2);
+          next_day = '01';
+          console.log(6);
+        } else if (number_end_day.getDate() + 1 >= 10 && number_end_day.getDate() + 1 < 32) {
+          next_day = String(0 + number_end_day.getDate() + 1);
+          console.log(7);
+        }
+
+        this.end_day = year + '-' + next_month + '-' + next_day;
+      }
+
+      console.log(this.start_day + '/' + this.end_day);
+      axios.get('/api/factoryusers/' + this.id + '/records/' + this.start_day + '/' + this.end_day).then(function (res) {
+        _this4.serch_responce = res.data;
         console.log(res.data);
       });
     },
-    getSelectDay: function getSelectDay(start, end) {
-      var dayData = []; //startDayからendDayまでの日付を入れる配列
-
-      var startDate = new Date(start);
-      var endDate = new Date(end);
-
-      while (startDate < endDate) {
-        dayData = [].concat(_toConsumableArray(dayData), [startDate.getFullYear() + '-' + ("00" + (startDate.getMonth() + 1)).slice(-2) + '-' + ("00" + startDate.getDate()).slice(-2)]);
-        startDate.setDate(startDate.getDate() + 1); //startDayをdayData配列の中に入れ、+1日してwhileでendDayまでのループを回す
-      }
-
-      dayData = [].concat(_toConsumableArray(dayData), [endDate.getFullYear() + '-' + ("00" + (endDate.getMonth() + 1)).slice(-2) + '-' + ("00" + endDate.getDate()).slice(-2)]);
-      this.select_day_list = dayData; //dayData配列内にstartDayからendDayまでのデータが格納され、それを空の配列内に入れ直す
-    },
     destoryRecord: function destoryRecord(record_data) {
-      var _this6 = this;
+      var _this5 = this;
 
       axios["delete"]('/api/factoryusers/factoryuser/records/' + record_data.id).then(function () {
-        _this6.getRecord();
+        _this5.getRecord();
 
-        axios.get('/api/factoryusers/' + _this6.id).then(function (responce) {
+        axios.get('/api/factoryusers/' + _this5.id).then(function (responce) {
+          console.log(responce);
+          console.log(record_data);
+
           if (responce.data[0].day_record_check === record_data.day.slice(0, 10)) {
-            var day_record_check_value = _this6.serchRecords.slice(-1)[0].day.slice(0, 10);
+            console.log(_this5.serch_responce);
 
+            var day_record_check_value = _this5.serch_responce[1].day.slice(0, 10);
+
+            console.log(day_record_check_value);
             var factoryuser = {
-              factoryuser_name: _this6.factoryuser_name,
-              birthday: _this6.birthday,
-              care_level: _this6.care_level,
-              number: _this6.number,
+              factoryuser_name: _this5.factoryuser_name,
+              birthday: _this5.birthday,
+              care_level: _this5.care_level,
+              number: _this5.number,
               day_record_check: day_record_check_value
             };
-            axios.put('/api/factoryusers/' + _this6.id, factoryuser).then(function (res) {
+            axios.put('/api/factoryusers/' + _this5.id, factoryuser).then(function (res) {
               console.log(res.data);
             });
           }
         });
       });
     },
-    trackDays: function trackDays(start, end) {
-      this.start_day = start;
-      this.end_day = end;
-    },
-    getMonthData: function getMonthData(day) {
-      this.start_day = day + '-01';
-      this.end_day = day + '-31';
-      console.log(this.start_day + '/' + this.end_day);
-    },
     postArchives: function postArchives(record) {
-      var _this7 = this;
+      var _this6 = this;
 
       var user_name = '';
       var user_number = '';
@@ -306,18 +277,18 @@ function _arrayLikeToArray(arr, len) {
         user_number = responce.data[0].number;
       }).then(function () {
         var post_archive_value = {
-          factoryuser_id: _this7.id,
+          factoryuser_id: _this6.id,
           factoryuser_name: user_name,
           factoryuser_number: user_number,
-          staff_id: _this7.login_user_id,
-          staff_name: _this7.login_user.name,
-          day: _this7.real_date,
+          staff_id: _this6.login_user_id,
+          staff_name: _this6.login_user.name,
+          day: _this6.real_date,
           archive_record: record.record_value,
           archive_memo: '・'
         };
         axios.get('/api/archives').then(function (res) {
           for (var i = 0; i < res.data.length; i++) {
-            if (res.data[i].day.slice(0, 10) === _this7.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === _this7.id) {
+            if (res.data[i].day.slice(0, 10) === _this6.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === _this6.id) {
               axios["delete"]('/api/archives/' + String(res.data[i].id));
             }
           }
@@ -333,6 +304,61 @@ function _arrayLikeToArray(arr, len) {
       this.dataArrays = array.slice().sort(function (a, b) {
         return Number(new Date(a.day)) - Number(new Date(b.day));
       }).reverse();
+    },
+    //サーチ用のコントローラを作成し使用
+    recordSerch: function recordSerch() {
+      var _this7 = this;
+
+      if (this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
+        var day_first = this.real_date.slice(0, 7);
+        this.start_day = day_first + '-01';
+
+        if (Number(day_first.slice(6, 7)) + 1 < 10) {
+          this.end_day = day_first.slice(0, 5) + 0 + String(Number(day_first.slice(6, 7)) + 1).slice(-1) + '-01';
+        } else if (Number(day_first.slice(6, 7)) + 1 >= 10) {
+          this.end_day = day_first.slice(0, 5) + Number(day_first.slice(6, 7)) + 1 + '-01';
+        }
+      } else if (this.dayKeywordFirst !== '' && this.dayKeywordSecond !== '') {
+        var number_end_day = new Date(this.dayKeywordSecond + 'T00:00:00');
+        var next_month = '';
+        var next_day = '';
+        var year = this.dayKeywordSecond.slice(0, 4);
+
+        if (number_end_day.getMonth() + 1 < 10) {
+          next_month = 0 + String(number_end_day.getMonth() + 1);
+          console.log(1);
+        } else if (number_end_day.getMonth() + 1 === 12 && number_end_day.getDate() + 1 === 32) {
+          year = String(Number(year) + 1);
+          next_month = '01';
+          next_day = '01';
+          console.log(2);
+        } else if (number_end_day.getMonth() + 1 >= 10 && number_end_day.getMonth() + 1 < 13) {
+          next_month = String(number_end_day.getMonth() + 1);
+          console.log(3);
+        }
+
+        if (number_end_day.getMonth() + 1 === 12 && number_end_day.getDate() + 1 === 32) {
+          console.log(4);
+        } else if (number_end_day.getDate() + 1 < 10) {
+          next_day = 0 + String(number_end_day.getDate() + 1);
+          console.log(5);
+        } else if (number_end_day.getDate() + 1 === 32 && number_end_day.getMonth() + 1 !== 12) {
+          next_month = String(number_end_day.getMonth() + 2);
+          next_day = '01';
+          console.log(6);
+        } else if (number_end_day.getDate() + 1 >= 10 && number_end_day.getDate() + 1 < 32) {
+          next_day = String(0 + number_end_day.getDate() + 1);
+          console.log(7);
+        }
+
+        this.end_day = year + '-' + next_month + '-' + next_day;
+      }
+
+      console.log(this.start_day);
+      console.log(this.end_day);
+      axios.get('/api/' + this.id + '/serch/' + this.keyword + '/' + this.start_day + '/' + this.end_day).then(function (res) {
+        _this7.serch_responce = res.data;
+      });
     },
     // 現在のページで表示するアイテムリストを取得する
     displayItems: function displayItems(array) {
@@ -491,54 +517,51 @@ var _hoisted_24 = {
   "class": "col-6 mb-3"
 };
 var _hoisted_25 = {
-  id: "record_data"
-};
-var _hoisted_26 = {
   "class": "overflow-auto",
   style: {
     "height": "300px"
   }
 };
-var _hoisted_27 = {
+var _hoisted_26 = {
   "class": "space"
 };
+var _hoisted_27 = ["onClick"];
 var _hoisted_28 = ["onClick"];
 var _hoisted_29 = ["onClick"];
-var _hoisted_30 = ["onClick"];
 
-var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("hr", null, null, -1
 /* HOISTED */
 );
 
-var _hoisted_32 = {
+var _hoisted_31 = {
   "class": "text-center mt-1"
 };
-var _hoisted_33 = {
+var _hoisted_32 = {
   "class": "container"
 };
-var _hoisted_34 = {
+var _hoisted_33 = {
   "class": "pagination",
   style: {
     "justify-content": "center"
   }
 };
+var _hoisted_34 = {
+  "class": "page-item"
+};
 var _hoisted_35 = {
   "class": "page-item"
 };
-var _hoisted_36 = {
+var _hoisted_36 = ["onClick"];
+var _hoisted_37 = {
   "class": "page-item"
 };
-var _hoisted_37 = ["onClick"];
 var _hoisted_38 = {
-  "class": "page-item"
-};
-var _hoisted_39 = {
   "class": "page-item"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     "class": "mt-2",
-    onMousemoveOnce: _cache[15] || (_cache[15] = function () {
+    onMousemoveOnce: _cache[16] || (_cache[16] = function () {
       return $options.getRecord && $options.getRecord.apply($options, arguments);
     })
   }, [_hoisted_1, _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -585,8 +608,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.select_month]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[6] || (_cache[6] = function ($event) {
-      return $options.getMonthData($data.select_month);
+    onClick: _cache[6] || (_cache[6] = function () {
+      return $options.getRecord && $options.getRecord.apply($options, arguments);
     }),
     "class": "btn btn-primary px-1"
   }, " 表示 ")]), _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -606,8 +629,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.dayKeywordSecond]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[9] || (_cache[9] = function ($event) {
-      return $options.trackDays($data.dayKeywordFirst, $data.dayKeywordSecond);
+    onClick: _cache[9] || (_cache[9] = function () {
+      return $options.getRecord && $options.getRecord.apply($options, arguments);
     }),
     "class": "btn btn-primary px-1"
   }, " 表示 "), _hoisted_18]), _hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [!$data.select_month && !$data.dayKeywordFirst && !$data.dayKeywordSecond ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.no_select_view_day) + "の記録", 1
@@ -625,20 +648,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     list: "record_data"
   }, null, 512
   /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("datalist", _hoisted_25, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.keywordSerchRecords, function (n) {
-    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("option", {
-      key: n
-    }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(n.record_value), 1
-    /* TEXT */
-    );
-  }), 128
-  /* KEYED_FRAGMENT */
-  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.recordArray, function (record, key) {
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[11] || (_cache[11] = function () {
+      return $options.recordSerch && $options.recordSerch.apply($options, arguments);
+    })
+  }, "検索"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.recordArray, function (record, key) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: key
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "日付: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.day), 1
     /* TEXT */
-    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.record_value), 1
+    ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.record_value), 1
     /* TEXT */
     ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "登録者: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(record.staff_name), 1
     /* TEXT */
@@ -649,32 +668,32 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }
     }, " 更新 ", 8
     /* PROPS */
-    , _hoisted_28), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_27), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       "class": "col-2 col-lg-1 btn btn-primary px-0 mx-2",
       onClick: function onClick($event) {
         return $options.destoryRecord(record);
       }
     }, " 削除 ", 8
     /* PROPS */
-    , _hoisted_29), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_28), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       "class": "col-5 col-lg-2 btn btn-primary px-0",
       onClick: function onClick($event) {
         return $options.postArchives(record);
       }
     }, " 記録まとめへ追加 ", 8
     /* PROPS */
-    , _hoisted_30), _hoisted_31]);
+    , _hoisted_29), _hoisted_30]);
   }), 128
   /* KEYED_FRAGMENT */
-  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
+  ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
   /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[11] || (_cache[11] = function () {
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[12] || (_cache[12] = function () {
       return $options.first && $options.first.apply($options, arguments);
     }),
     "class": "page-link"
-  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[12] || (_cache[12] = function () {
+  }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[13] || (_cache[13] = function () {
       return $options.prev && $options.prev.apply($options, arguments);
     }),
     "class": "page-link"
@@ -689,16 +708,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "page-link"
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(i), 9
     /* TEXT, PROPS */
-    , _hoisted_37)]);
+    , _hoisted_36)]);
   }), 128
   /* KEYED_FRAGMENT */
-  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_38, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[13] || (_cache[13] = function () {
+  )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_37, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[14] || (_cache[14] = function () {
       return $options.next && $options.next.apply($options, arguments);
     }),
     "class": "page-link"
-  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[14] || (_cache[14] = function () {
+  }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_38, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    onClick: _cache[15] || (_cache[15] = function () {
       return $options.last && $options.last.apply($options, arguments);
     }),
     "class": "page-link"

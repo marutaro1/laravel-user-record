@@ -35,10 +35,11 @@ Route::post('/factoryusers', [FactoryuserController::class, 'store']);
 Route::get('/factoryusers/{factoryuser}', [FactoryuserController::class, 'show']);
 Route::put('/factoryusers/{factoryuser}', [FactoryuserController::class, 'update']);
 
-Route::get('/factoryusers/{factoryuser}/records', [RecordController::class, 'index']);
+Route::get('/factoryusers/{factoryuser}/records/{day}/{day_end}', [RecordController::class, 'index']);
 Route::post('/factoryusers/{factoryuser}/records', [RecordController::class, 'store']);
 Route::get('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'show']);
 Route::put('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'update']);
+Route::get('/{record}/serch/{record_keyword}/{day}/{day_end}', [RecordController::class, 'serch']);
 Route::delete('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'delete']);
 
 Route::get('/factoryusers/{factoryuser}/manuels', [ManuelController::class, 'index']);
