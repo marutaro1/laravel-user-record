@@ -12,12 +12,11 @@ class ArchiveController extends Controller
         
         // return Archive::all();
         if(isset($day)) {
-            $query = Archive::query()
+            $archive = Archive::query()
             ->where('day', '=', $day)
-            ->orderBy('factoryuser_number','asc');
+            ->orderByRaw('CAST(factoryuser_number as SIGNED) asc')
+            ->get();
         }
-
-        $archive = $query->get();
 
         return $archive;
     }
