@@ -39,7 +39,7 @@
     </div>
 
     <div class="overflow-auto" style="height:600px;">
-      <div v-for="archive in sortArchives" :key="archive.id">
+      <div v-for="archive in archives" :key="archive.id">
         <p>
           部屋番号:
          <router-link :to="'/factoryusers/' + archive.staff_id + '/' + archive.factoryuser_id + '/records'">{{archive.factoryuser_number.slice(0,-1)}}</router-link>
@@ -90,6 +90,7 @@
           >
             <div v-for="memo in archive_memos" :key="memo.id">
             <div v-if="archive.factoryuser_id === memo.factoryuser_id">
+              {{memo.id}}
               <p>{{memo.memo_record}}
                 <button
                 @click="deleteArchiveMemo(memo)"
@@ -126,15 +127,6 @@
         copy_button_boolean: false,
       }
     },
-    computed: {
-      sortArchives() {
-        const sort_archives_data = this.archives.slice()
-                  .sort((a, b) => {
-                    return Number(a.factoryuser_number) - Number(b.factoryuser_number);
-                   });
-        return sort_archives_data;
-      }
-    },
     methods: {
       getArchives(day) {
         if(day === this.serch_archive_today) {
@@ -143,36 +135,19 @@
           this.copy_button_boolean = true;
         }
         this.archives = [];
-        axios.get('/api/archives').then((res) => {
-          for(let i = 0; i < res.data.length; i++) {
-            if(res.data[i].day.slice(0, 10) === day.slice(0, 10)) {
-                this.archives.push(res.data[i]);
+        axios.get('/api/archives/' + day.slice(0,10)).then((res) => {
+              this.archives = res.data;
+
                 if(day === this.serch_archive_select_day) {
-                        if(res.data[i].day.slice(0, 10) === this.serch_archive_today) {
-                          this.getArchiveMemo(res.data[i]);
-                          console.log('コピーの日付')
-                        }
-                } else  {
-                  this.getArchiveMemo(res.data[i]);
+                  this.getArchiveMemo();
+                  console.log('コピーの日付')
+                } else {
+                  this.getArchiveMemo();
                   console.log('今日の日付')
                 }
-            } 
-           } 
           });
       },
       copyArchives() {
-        const today_archives = [];
-        axios.get('/api/archives').then((responce) => {
-          for(let n = 0; n < responce.data.length; n++) {
-            if(responce.data[n].day.slice(0,10) === this.serch_archive_today) {
-              today_archives.push(responce.data[n]);
-              console.log(today_archives)
-            }
-          }
-        }).then(() => {
-          for(let count = 0; count < today_archives.length; count++) {
-            axios.delete('/api/archives/' + today_archives[count].id);
-          }
           for(let i = 0; i < this.archives.length; i++) {
             const copy_archive_data = {
               id: this.archives[i].id,
@@ -186,11 +161,10 @@
               archive_memo: this.archives[i].archive_memo
             }
 
-            axios.post('/api/archives', copy_archive_data).then((res) => {
+            axios.post('/api/archives/' + this.serch_archive_today, copy_archive_data).then((res) => {
               console.log(res.data);
-            })
+            });
           }
-        });
       },
       updateArchiveRecord(archive) {
         archive.archive_record = this.update_archive_record_value;
@@ -203,9 +177,10 @@
       },
       deleteArchive(archive) {
         axios.delete('/api/archives/' + String(archive.id)).then((res) => {
-          console.log(res);
+          this.getArchives(this.serch_archive_today)
         })
       },
+
       postArchiveMemo(archive) {
         const archive_memo_value = {
           factoryuser_id: archive.factoryuser_id,
@@ -214,39 +189,26 @@
           day: this.serch_archive_today.slice(0, 10),
           memo_record: archive.archive_memo,
         }
-        axios.post('/api/memos', archive_memo_value).then(() => {
-            axios.get('/api/archives').then((res) => {
-              for(let i = 0; i < res.data.length; i++) {
-                  if(res.data[i].day.slice(0, 10) === this.serch_archive_today) {
-                   this.getArchiveMemo(res.data[i]);
-                  }
-                }
-            });
-
+        axios.post('/api/memos/' + this.serch_archive_today.slice(0,10) + '/' + archive.factoryuser_id, archive_memo_value).then((res) => {
+          console.log(res)
+          this.getArchiveMemo();
         });
-      
       },
-      getArchiveMemo(archive) {
+
+      getArchiveMemo() {
         this.archive_memos = [];
-          axios.get('/api/memos').then((res) => {
-            for(let i = 0; i < res.data.length; i++) {
-              if(res.data[i].staff_id === Number(this.login_user_id) && res.data[i].day.slice(0,10) === archive.day.slice(0,10) && res.data[i].factoryuser_id === archive.factoryuser_id) {
-                  this.archive_memos.push(res.data[i]);
-            }
-          }
+          axios.get('/api/memos/' + this.serch_archive_today + '/' + this.login_user_id).then((res) => {
+            console.log(res);
+            this.archive_memos = res.data;
         })
       },
+
       deleteArchiveMemo(memo) {
-        axios.delete('/api/memos/' + memo.id)
-          axios.get('/api/archives').then((res) => {
-              for(let i = 0; i < res.data.length; i++) {
-                  if(res.data[i].day.slice(0, 10) === this.serch_archive_today) {
-                   this.getArchiveMemo(res.data[i]);
-                  }
-                }
-              });
-    
+        axios.delete('/api/memos/' + memo.id).then(() => {
+          this.getArchiveMemo();
+        })
       }
+
     }
   }
 </script>

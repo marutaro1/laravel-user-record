@@ -11,12 +11,8 @@ class RecordController extends Controller
 {
     public function index($id, $day, $day_end) 
     {
-        // $factoryuser_records = Record::select('records.*')
-        // ->where('factoryuser_id', '=', $id)
-        // ->whereNull('deleted_at')
-        // ->get();
-        // return $factoryuser_records;
 
+        
         if(isset($id)) {
             $query = Record::query()
             ->where('factoryuser_id', '=', $id)
@@ -37,10 +33,7 @@ class RecordController extends Controller
 
     public function show(Record $record) 
     {
-        // $factoryuser_id = Factoryuser::insertGetId(['id' => $id]);
-        // $record_find = Record::find($record['id']);
-        // $record_id = Record::insertGetId(['id' => $record_find]);
-        // UserIntermediaValue::insert(['factoryuser_id' => $factoryuser_id, 'record_id' => $record_id]);
+       
         return Record::find($record['id']);
     }
 

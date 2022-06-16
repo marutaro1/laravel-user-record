@@ -25,14 +25,6 @@ __webpack_require__.r(__webpack_exports__);
       copy_button_boolean: false
     };
   },
-  computed: {
-    sortArchives: function sortArchives() {
-      var sort_archives_data = this.archives.slice().sort(function (a, b) {
-        return Number(a.factoryuser_number) - Number(b.factoryuser_number);
-      });
-      return sort_archives_data;
-    }
-  },
   methods: {
     getArchives: function getArchives(day) {
       var _this = this;
@@ -44,74 +36,54 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.archives = [];
-      axios.get('/api/archives').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].day.slice(0, 10) === day.slice(0, 10)) {
-            _this.archives.push(res.data[i]);
+      axios.get('/api/archives/' + day.slice(0, 10)).then(function (res) {
+        _this.archives = res.data;
 
-            if (day === _this.serch_archive_select_day) {
-              if (res.data[i].day.slice(0, 10) === _this.serch_archive_today) {
-                _this.getArchiveMemo(res.data[i]);
+        if (day === _this.serch_archive_select_day) {
+          _this.getArchiveMemo();
 
-                console.log('コピーの日付');
-              }
-            } else {
-              _this.getArchiveMemo(res.data[i]);
+          console.log('コピーの日付');
+        } else {
+          _this.getArchiveMemo();
 
-              console.log('今日の日付');
-            }
-          }
+          console.log('今日の日付');
         }
       });
     },
     copyArchives: function copyArchives() {
-      var _this2 = this;
-
-      var today_archives = [];
-      axios.get('/api/archives').then(function (responce) {
-        for (var n = 0; n < responce.data.length; n++) {
-          if (responce.data[n].day.slice(0, 10) === _this2.serch_archive_today) {
-            today_archives.push(responce.data[n]);
-            console.log(today_archives);
-          }
-        }
-      }).then(function () {
-        for (var count = 0; count < today_archives.length; count++) {
-          axios["delete"]('/api/archives/' + today_archives[count].id);
-        }
-
-        for (var i = 0; i < _this2.archives.length; i++) {
-          var copy_archive_data = {
-            id: _this2.archives[i].id,
-            factoryuser_id: _this2.archives[i].factoryuser_id,
-            factoryuser_name: _this2.archives[i].factoryuser_name,
-            factoryuser_number: _this2.archives[i].factoryuser_number,
-            staff_id: _this2.archives[i].staff_id,
-            staff_name: _this2.archives[i].staff_name,
-            day: _this2.serch_archive_today,
-            archive_record: _this2.archives[i].archive_record,
-            archive_memo: _this2.archives[i].archive_memo
-          };
-          axios.post('/api/archives', copy_archive_data).then(function (res) {
-            console.log(res.data);
-          });
-        }
-      });
+      for (var i = 0; i < this.archives.length; i++) {
+        var copy_archive_data = {
+          id: this.archives[i].id,
+          factoryuser_id: this.archives[i].factoryuser_id,
+          factoryuser_name: this.archives[i].factoryuser_name,
+          factoryuser_number: this.archives[i].factoryuser_number,
+          staff_id: this.archives[i].staff_id,
+          staff_name: this.archives[i].staff_name,
+          day: this.serch_archive_today,
+          archive_record: this.archives[i].archive_record,
+          archive_memo: this.archives[i].archive_memo
+        };
+        axios.post('/api/archives/' + this.serch_archive_today, copy_archive_data).then(function (res) {
+          console.log(res.data);
+        });
+      }
     },
     updateArchiveRecord: function updateArchiveRecord(archive) {
-      var _this3 = this;
+      var _this2 = this;
 
       archive.archive_record = this.update_archive_record_value;
       axios.put('/api/archives/' + archive.id, archive).then(function (res) {
-        _this3.update_archive_record_value = '';
+        _this2.update_archive_record_value = '';
       });
     },
     copyArchiveRecord: function copyArchiveRecord(archive) {
       this.update_archive_record_value = archive.archive_record;
     },
     deleteArchive: function deleteArchive(archive) {
+      var _this3 = this;
+
       axios["delete"]('/api/archives/' + String(archive.id)).then(function (res) {
-        console.log(res);
+        _this3.getArchives(_this3.serch_archive_today);
       });
     },
     postArchiveMemo: function postArchiveMemo(archive) {
@@ -124,38 +96,26 @@ __webpack_require__.r(__webpack_exports__);
         day: this.serch_archive_today.slice(0, 10),
         memo_record: archive.archive_memo
       };
-      axios.post('/api/memos', archive_memo_value).then(function () {
-        axios.get('/api/archives').then(function (res) {
-          for (var i = 0; i < res.data.length; i++) {
-            if (res.data[i].day.slice(0, 10) === _this4.serch_archive_today) {
-              _this4.getArchiveMemo(res.data[i]);
-            }
-          }
-        });
+      axios.post('/api/memos/' + this.serch_archive_today.slice(0, 10) + '/' + archive.factoryuser_id, archive_memo_value).then(function (res) {
+        console.log(res);
+
+        _this4.getArchiveMemo();
       });
     },
-    getArchiveMemo: function getArchiveMemo(archive) {
+    getArchiveMemo: function getArchiveMemo() {
       var _this5 = this;
 
       this.archive_memos = [];
-      axios.get('/api/memos').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].staff_id === Number(_this5.login_user_id) && res.data[i].day.slice(0, 10) === archive.day.slice(0, 10) && res.data[i].factoryuser_id === archive.factoryuser_id) {
-            _this5.archive_memos.push(res.data[i]);
-          }
-        }
+      axios.get('/api/memos/' + this.serch_archive_today + '/' + this.login_user_id).then(function (res) {
+        console.log(res);
+        _this5.archive_memos = res.data;
       });
     },
     deleteArchiveMemo: function deleteArchiveMemo(memo) {
       var _this6 = this;
 
-      axios["delete"]('/api/memos/' + memo.id);
-      axios.get('/api/archives').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].day.slice(0, 10) === _this6.serch_archive_today) {
-            _this6.getArchiveMemo(res.data[i]);
-          }
-        }
+      axios["delete"]('/api/memos/' + memo.id).then(function () {
+        _this6.getArchiveMemo();
       });
     }
   }
@@ -322,7 +282,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "btn btn-warning mt-1 mb-3"
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.serch_archive_select_day) + ":記録コピー ", 1
   /* TEXT */
-  )])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.sortArchives, function (archive) {
+  )])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.archives, function (archive) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: archive.id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
@@ -380,7 +340,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     , _hoisted_25)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.archive_memos, function (memo) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         key: memo.id
-      }, [archive.factoryuser_id === memo.factoryuser_id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(memo.memo_record) + " ", 1
+      }, [archive.factoryuser_id === memo.factoryuser_id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(memo.id) + " ", 1
+      /* TEXT */
+      ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(memo.memo_record) + " ", 1
       /* TEXT */
       ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
         onClick: function onClick($event) {

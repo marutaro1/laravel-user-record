@@ -243,9 +243,6 @@ __webpack_require__.r(__webpack_exports__);
         _this5.getRecord();
 
         axios.get('/api/factoryusers/' + _this5.id).then(function (responce) {
-          console.log(responce);
-          console.log(record_data);
-
           if (responce.data[0].day_record_check === record_data.day.slice(0, 10)) {
             console.log(_this5.serch_responce);
 
@@ -282,20 +279,14 @@ __webpack_require__.r(__webpack_exports__);
           factoryuser_number: user_number,
           staff_id: _this6.login_user_id,
           staff_name: _this6.login_user.name,
-          day: _this6.real_date,
+          day: _this6.real_date.slice(0, 10),
           archive_record: record.record_value,
           archive_memo: '・'
         };
-        axios.get('/api/archives').then(function (res) {
-          for (var i = 0; i < res.data.length; i++) {
-            if (res.data[i].day.slice(0, 10) === _this6.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === _this6.id) {
-              axios["delete"]('/api/archives/' + String(res.data[i].id));
-            }
-          }
-
-          ;
+        axios.get('/api/archives/' + _this6.real_date.slice(0, 10)).then(function (res) {
+          console.log('res.data');
         }).then(function () {
-          axios.post('/api/archives', post_archive_value);
+          axios.post('/api/archives/' + _this6.real_date.slice(0, 10), post_archive_value);
         });
       });
     },

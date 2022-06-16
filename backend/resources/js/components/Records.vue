@@ -398,8 +398,6 @@
                 this.getRecord();
 
                 axios.get('/api/factoryusers/' + this.id).then((responce) => {
-                  console.log(responce)
-                  console.log(record_data)
                   if( responce.data[0].day_record_check === record_data.day.slice(0,10) ) {
                     console.log(this.serch_responce)
                     
@@ -438,19 +436,15 @@
                factoryuser_number: user_number,
                staff_id: this.login_user_id,
                staff_name: this.login_user.name,
-               day: this.real_date,
+               day: this.real_date.slice(0,10),
                archive_record: record.record_value,
                archive_memo: '・',
              }
 
-             axios.get('/api/archives').then((res) => { 
-               for(let i = 0; i < res.data.length; i++) {
-                 if(res.data[i].day.slice(0, 10) === this.real_date.slice(0, 10) && String(res.data[i].factoryuser_id) === this.id) {
-                    axios.delete('/api/archives/' + String(res.data[i].id));
-                 }
-              };
+             axios.get('/api/archives/' + this.real_date.slice(0,10) ).then((res) => { 
+           console.log('res.data')
              }).then(() => {
-              axios.post('/api/archives', post_archive_value)
+              axios.post('/api/archives/' + this.real_date.slice(0,10), post_archive_value)
              })
 
              })

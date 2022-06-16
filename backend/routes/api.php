@@ -66,15 +66,15 @@ Route::get('/treatments/{treatment}', [TreatmentController::class, 'show']);
 Route::put('/treatments/{treatment}', [TreatmentController::class, 'update']);
 Route::delete('/treatments/{treatment}', [TreatmentController::class, 'delete']);
 
-Route::get('/archives', [ArchiveController::class, 'index']);
-Route::post('/archives', [ArchiveController::class, 'store']);
+Route::get('/archives/{day}', [ArchiveController::class, 'index']);
+Route::post('/archives/{day}', [ArchiveController::class, 'store']);
 Route::get('/archives/{archive}', [ArchiveController::class, 'show']);
 Route::put('/archives/{archive}', [ArchiveController::class, 'update']);
 Route::delete('/archives/{archive}', [ArchiveController::class, 'delete']);
 
-Route::get('/memos', [ArchiveMemoController::class, 'index']);
-Route::post('/memos', [ArchiveMemoController::class, 'store']);
-Route::get('/memos/{memo}', [ArchiveMemoController::class, 'show']);
+Route::get('/memos/{day}/{user}', [ArchiveMemoController::class, 'index']);
+Route::post('/memos/{day}/{user}', [ArchiveMemoController::class, 'store']);
+Route::get('/memos/{day}/{user}/{factoryuser}/{memo}', [ArchiveMemoController::class, 'show']);
 Route::delete('/memos/{memo}', [ArchiveMemoController::class, 'delete']);
 
 Route::get('/daily_work', [DailyWorkController::class, 'index']);

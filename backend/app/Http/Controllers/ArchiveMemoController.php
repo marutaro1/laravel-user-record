@@ -8,10 +8,21 @@ use App\Models\ArchiveMemo;
 class ArchiveMemoController extends Controller
 {
     //
-    public function index() 
+    public function index($day, $staff_id) 
     {
         
-        return ArchiveMemo::all();
+        if(isset($day)) {
+            $archive_memo = ArchiveMemo::query()
+            ->where('archive_memos.day', '=', $day)
+            ->where('archive_memos.staff_id', '=', $staff_id)
+            ->get();
+        }
+
+
+
+
+
+        return $archive_memo;
     }
 
     public function store(Request $request) 
@@ -19,16 +30,24 @@ class ArchiveMemoController extends Controller
         return ArchiveMemo::create($request->all());
     }
 
-    public function show(ArchiveMemo $memo) 
-    {
-
-        return ArchiveMemo::find($memo['id']);
+    public function show($day, $staff, $factoryuser, $id) 
+    {  
+       $archive_memo_data = ArchiveMemo::query()
+       ->where('day', '=', $day)
+       ->where('staff_id', '=', $staff)
+       ->where('factoryuser_id', '=', $factoryuser)
+       ->where('id', '=', $id)
+       ->get();
+       return $archive_memo_data;
     }
 
-    public function delete(ArchiveMemo $memo)
+    public function delete($id)
     {
-       $memo->delete();
+        $archive_memo_data = ArchiveMemo::find($id);
+     
+        $archive_memo_data->delete();
 
-        return $memo;
+
+        return $archive_memo_data;
     }
 }
