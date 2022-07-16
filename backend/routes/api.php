@@ -29,6 +29,7 @@ use App\Http\Controllers\TreatmentRecordController;
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
 Route::get('/users/{user_id}', [UserController::class, 'show']);
+Route::get('/users/name/{user_name}', [UserController::class, 'serch']);
 
 Route::get('/factoryusers', [FactoryuserController::class, 'index']);
 Route::post('/factoryusers', [FactoryuserController::class, 'store']);
@@ -77,16 +78,18 @@ Route::post('/memos/{day}/{user}', [ArchiveMemoController::class, 'store']);
 Route::get('/memos/{day}/{user}/{factoryuser}/{memo}', [ArchiveMemoController::class, 'show']);
 Route::delete('/memos/{memo}', [ArchiveMemoController::class, 'delete']);
 
-Route::get('/daily_work', [DailyWorkController::class, 'index']);
-Route::post('/daily_work', [DailyWorkController::class, 'store']);
+Route::get('/daily_work/{day_of_week}/{department}', [DailyWorkController::class, 'index']);
+Route::post('/daily_work/{day_of_week}/{department}', [DailyWorkController::class, 'store']);
 
-Route::get('/staff_daily_work', [StaffDailyWorkController::class, 'index']);
-Route::post('/staff_daily_work', [StaffDailyWorkController::class, 'store']);
+Route::get('/staff_daily_work/{day}/{department}', [StaffDailyWorkController::class, 'index']);
+Route::post('/staff_daily_work/{day}/{department}', [StaffDailyWorkController::class, 'store']);
+Route::get('/staff_daily_work/{day}/{department}/{user_name}', [StaffDailyWorkController::class, 'show']);
+// Route::post('/staff_daily_work/{day}/{department}/{user}', [StaffDailyWorkController::class, 'store']);
 
-Route::get('/complete_works', [CompleteWorkCheckController::class, 'index']);
-Route::post('/complete_works', [CompleteWorkCheckController::class, 'store']);
-Route::get('/complete_works/{complete_work_id}', [CompleteWorkCheckController::class, 'show']);
-Route::post('/complete_works/{complete_work_id}', [CompleteWorkCheckController::class, 'update']);
+Route::get('/complete_works/{day}', [CompleteWorkCheckController::class, 'index']);
+Route::post('/complete_works/{day}', [CompleteWorkCheckController::class, 'store']);
+Route::get('/complete_works/{day}/{user_name}', [CompleteWorkCheckController::class, 'show']);
+Route::post('/complete_works/{day}/{user_name}', [CompleteWorkCheckController::class, 'update']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

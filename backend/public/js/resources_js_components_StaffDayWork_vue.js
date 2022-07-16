@@ -71,8 +71,7 @@ __webpack_require__.r(__webpack_exports__);
         work: this.new_work,
         user_department: this.user_department
       };
-      axios.post('/api/daily_work', new_daily_work).then(function (res) {
-        console.log(res.data);
+      axios.post('/api/daily_work/' + this.week + '/' + this.user_department, new_daily_work).then(function () {
         _this2.week = '';
         _this2.new_work = '';
       });
@@ -81,15 +80,10 @@ __webpack_require__.r(__webpack_exports__);
     getDayliWork: function getDayliWork() {
       var _this3 = this;
 
-      var work_array = [];
-      axios.get('/api/daily_work').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].user_department === _this3.user_department && res.data[i].day_of_week === _this3.today_week) {
-            work_array.push(res.data[i]);
-          }
-        }
-
-        _this3.select_daily_work = work_array;
+      this.select_daily_work = [];
+      axios.get('/api/daily_work/' + this.today_week + '/' + this.user_department).then(function (res) {
+        console.log(res.data);
+        _this3.select_daily_work = res.data;
       });
     },
     addStaffData: function addStaffData() {
@@ -123,12 +117,18 @@ __webpack_require__.r(__webpack_exports__);
           works: String(staff[i].staff_work),
           complete_work_check: false
         });
-        axios.post('/api/staff_daily_work', daily_work[i]).then(function (res) {
+        axios.post('/api/staff_daily_work/' + this.today + '/' + this.user_department, daily_work[i]).then(function (res) {
           console.log(res.data);
         });
       }
 
       ;
+    },
+    routerReturn: function routerReturn() {
+      this.$router.push('/staffdaywork/' + this.login_user_id);
+    },
+    routerPush: function routerPush() {
+      this.$router.push('/staffdaywork/' + this.login_user_id + '/' + this.today + '/works');
     }
   },
   created: function created() {
@@ -313,13 +313,14 @@ var _hoisted_63 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 );
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _component_router_link = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("router-link");
-
   var _component_router_view = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("router-view");
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "date",
-    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+    onClick: _cache[0] || (_cache[0] = function () {
+      return $options.routerReturn && $options.routerReturn.apply($options, arguments);
+    }),
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return $data.today = $event;
     }),
     "class": "form-control"
@@ -327,38 +328,38 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.today]])]), _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "class": "form-select form-select-sm",
-    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $data.user_department = $event;
     })
   }, _hoisted_12, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.user_department]])])]), !$data.open_staff_method ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[2] || (_cache[2] = function () {
+    onClick: _cache[3] || (_cache[3] = function () {
       return $options.getStaffName && $options.getStaffName.apply($options, arguments);
     }),
     "class": "mt-2 btn btn-warning"
   }, " 業務登録 ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method && $data.login_user.user_department === $data.user_department && $data.login_user.user_offitial_position !== '' || $data.open_staff_method && $data.user_department === 'studentSupport' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": "btn btn-warning py-0",
-    onClick: _cache[3] || (_cache[3] = function () {
+    onClick: _cache[4] || (_cache[4] = function () {
       return $options.closeStaffData && $options.closeStaffData.apply($options, arguments);
     })
   }, "×")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.open_staff_method && $data.login_user.user_department === $data.user_department && $data.login_user.user_offitial_position !== '' || $data.open_staff_method && $data.user_department === 'studentSupport' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "class": "form-select form-select-sm mb-2",
-    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $data.week = $event;
     })
   }, _hoisted_26, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.week]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
-    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
       return $data.new_work = $event;
     }),
     "class": "form-control"
   }, null, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.new_work]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[6] || (_cache[6] = function () {
+    onClick: _cache[7] || (_cache[7] = function () {
       return $options.addSelectNewWork && $options.addSelectNewWork.apply($options, arguments);
     }),
     "class": "btn btn-primary mt-2"
@@ -366,7 +367,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "class": "form-select form-select-sm",
-    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
       return $data.today_week = $event;
     })
   }, _hoisted_38, 512
@@ -376,7 +377,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: staff.id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_39, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       "class": "col-6 col-lg-5",
-      onClick: _cache[8] || (_cache[8] = function () {
+      onClick: _cache[9] || (_cache[9] = function () {
         return $options.getDayliWork && $options.getDayliWork.apply($options, arguments);
       })
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
@@ -451,7 +452,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, null, 8
     /* PROPS */
     , _hoisted_60), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, staff.add_staff_work_three]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-      onClick: _cache[9] || (_cache[9] = function () {
+      onClick: _cache[10] || (_cache[10] = function () {
         return $options.addStaffData && $options.addStaffData.apply($options, arguments);
       }),
       "class": "my-3 btn btn-primary"
@@ -467,27 +468,20 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }), 128
   /* KEYED_FRAGMENT */
   )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[10] || (_cache[10] = function ($event) {
+    onClick: _cache[11] || (_cache[11] = function ($event) {
       return $options.addStaffDailyWork($data.check_staffs_post);
     }),
     "class": "btn btn-warning"
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.today) + ":業務登録 ", 1
   /* TEXT */
-  )])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_63, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
-    to: '/staffdaywork/' + $props.login_user_id + '/works',
-    "class": "mb-2 btn btn-primary"
-  }, {
-    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.today) + ":業務表示 ", 1
-      /* TEXT */
-      )];
+  )])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_63, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[12] || (_cache[12] = function () {
+      return $options.routerPush && $options.routerPush.apply($options, arguments);
     }),
-    _: 1
-    /* STABLE */
-
-  }, 8
-  /* PROPS */
-  , ["to"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_view, {
+    "class": "mb-2 btn btn-primary"
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.today) + ":業務表示 ", 1
+  /* TEXT */
+  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_view, {
     today: $data.today,
     user_department: $data.user_department
   }, null, 8

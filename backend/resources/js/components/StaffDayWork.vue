@@ -4,7 +4,7 @@
     <div>
       <label class="col-6 col-form-label">日付:</label>
       <div class="col-6 col-lg-3">
-        <input type="date" v-model="today" class="form-control" />
+        <input type="date" @click="routerReturn" v-model="today" class="form-control" />
       </div>
       <label class="col-6 col-form-label">部署:</label>
       <div class="col-6 col-lg-2 mb-2">
@@ -163,9 +163,9 @@
     </div>
     </div>
     <hr />
-    <router-link :to="'/staffdaywork/' + login_user_id + '/works'" class="mb-2 btn btn-primary">
+    <button @click="routerPush" class="mb-2 btn btn-primary">
       {{today}}:業務表示
-    </router-link>
+    </button>
     <router-view
     v-bind:today="today"
     v-bind:user_department="user_department"
@@ -232,22 +232,17 @@
           work: this.new_work,
           user_department: this.user_department,
         }
-        axios.post('/api/daily_work', new_daily_work).then((res) => {
-          console.log(res.data);
+        axios.post('/api/daily_work/' + this.week + '/' + this.user_department, new_daily_work).then(() => {
           this.week = '';
           this.new_work = '';
         });
         this.getDayliWork();
       },
       getDayliWork() {
-          const work_array = [];
-          axios.get('/api/daily_work').then((res) => {
-            for(let i = 0; i < res.data.length; i++) {
-              if(res.data[i].user_department === this.user_department && res.data[i].day_of_week === this.today_week) {
-                work_array.push(res.data[i]);
-              }
-            }
-            this.select_daily_work = work_array;
+          this.select_daily_work = [];
+          axios.get('/api/daily_work/' + this.today_week + '/' + this.user_department).then((res) => {
+            console.log(res.data)
+            this.select_daily_work = res.data;
           });
       },
       addStaffData() {//登録するためのstaffのデータを追加するためのメソッド
@@ -280,11 +275,17 @@
                 complete_work_check: false,
               }
             );
-            axios.post('/api/staff_daily_work', daily_work[i]).then((res) => {
+            axios.post('/api/staff_daily_work/' + this.today + '/' + this.user_department, daily_work[i]).then((res) => {
               console.log(res.data);
             });
           };
         },
+        routerReturn() {
+          this.$router.push('/staffdaywork/' + this.login_user_id);
+        },
+        routerPush() {
+          this.$router.push('/staffdaywork/' + this.login_user_id + '/' + this.today + '/works');
+        }
 
       
     },

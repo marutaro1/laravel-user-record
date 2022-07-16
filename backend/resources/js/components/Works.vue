@@ -1,5 +1,6 @@
 <template>
   <div>
+  
     <div v-for="staff in staff_daily_works" :key="staff.id">
       <div v-if="today === staff.day && user_department === staff.department">
         <p>職員名:{{staff.staff_name}}</p>
@@ -9,7 +10,7 @@
 
         <router-link
           :to=
-          "'/staffdaywork/' + login_user_id + '/' + staff.id + '/staffpage'"
+          "'/staffdaywork/' + login_user_id + '/' + staff.staff_name + '/staffpage'"
           class="btn btn-primary p-1"
           >編集</router-link
         >
@@ -74,22 +75,21 @@
           array_works.push(array_data);
         }
         return array_works;
-      }
+      },
     },
     methods: {
       getStaffDailyWorks() {
-        axios.get('/api/staff_daily_work').then((res) => {
+        axios.get('/api/staff_daily_work/' + this.today + '/' + this.user_department).then((res) => {
           this.staff_daily_works = res.data;
-          console.log(this.staff_daily_works);
+          console.log(res);
         });
         this.getCompleteWorkCheck();
       },
       getCompleteWorkCheck() {
         console.log('start');
-        axios.get('/api/complete_works').then((res) => {
+        axios.get('/api/complete_works/' + this.today).then((res) => {
+        console.log(res);
           for(let i = 0; i < res.data.length; i++) {
-            if(res.data[i].day === this.today) {
-            console.log(res.data[i]);
               this.work_check.push(
                 { 
                   name: res.data[i].staff_name,
@@ -97,10 +97,10 @@
                   day: res.data[i].day,
                   memo: res.data[i].staff_memo
                 }
-              );
+              )
             }
-          }
         });
+        console.log(this.work_check);
       }
     },
 

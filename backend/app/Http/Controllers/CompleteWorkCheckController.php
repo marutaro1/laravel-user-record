@@ -7,9 +7,13 @@ use Illuminate\Http\Request;
 
 class CompleteWorkCheckController extends Controller
 {
-    public function index() 
+    public function index($day) 
     {
-        return CompleteWorkCheck::all();
+        $complete_work_check = CompleteWorkCheck::query()
+        ->where('day', '=', $day)
+        ->get();
+
+        return $complete_work_check;
     }
 
     public function store(Request $request) 
@@ -17,17 +21,25 @@ class CompleteWorkCheckController extends Controller
         return CompleteWorkCheck::create($request->all());
     }
 
-    public function show($id) 
+    public function show($day, $staff_name) 
     {
 
-        return CompleteWorkCheck::find($id);
+        $complete_work_check = CompleteWorkCheck::query()
+        ->where('day', '=', $day)
+        ->where('staff_name', '=', $staff_name)
+        ->get();
+
+        return $complete_work_check;
     }
 
-    public function update(Request $request, $id) 
+    public function update(Request $request, $day, $staff_name) 
     {
-        $completeworkcheck = CompleteWorkCheck::find($id);
-        $completeworkcheck->update($request->all());
+        $complete_work_check = CompleteWorkCheck::query()
+        ->where('day', '=', $day)
+        ->where('staff_name', '=', $staff_name)
+        ->first();
+        $complete_work_check->update($request->all());
 
-        return $completeworkcheck;
+        return $complete_work_check;
     }
 }

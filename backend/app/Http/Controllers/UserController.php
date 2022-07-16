@@ -33,4 +33,15 @@ class UserController extends Controller
 
         return User::find($id);
     }
+
+    public function serch($name) 
+    {
+        // $user_id = Auth::id();
+
+       $user = User::query()
+       ->where('name', '=', $name)
+       ->get();
+
+       return $user;
+    }
 }

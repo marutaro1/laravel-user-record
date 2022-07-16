@@ -45,9 +45,9 @@ __webpack_require__.r(__webpack_exports__);
     getStaffDailyWorks: function getStaffDailyWorks() {
       var _this = this;
 
-      axios.get('/api/staff_daily_work').then(function (res) {
+      axios.get('/api/staff_daily_work/' + this.today + '/' + this.user_department).then(function (res) {
         _this.staff_daily_works = res.data;
-        console.log(_this.staff_daily_works);
+        console.log(res);
       });
       this.getCompleteWorkCheck();
     },
@@ -55,20 +55,19 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       console.log('start');
-      axios.get('/api/complete_works').then(function (res) {
-        for (var i = 0; i < res.data.length; i++) {
-          if (res.data[i].day === _this2.today) {
-            console.log(res.data[i]);
+      axios.get('/api/complete_works/' + this.today).then(function (res) {
+        console.log(res);
 
-            _this2.work_check.push({
-              name: res.data[i].staff_name,
-              check: res.data[i].work_check.split(','),
-              day: res.data[i].day,
-              memo: res.data[i].staff_memo
-            });
-          }
+        for (var i = 0; i < res.data.length; i++) {
+          _this2.work_check.push({
+            name: res.data[i].staff_name,
+            check: res.data[i].work_check.split(','),
+            day: res.data[i].day,
+            memo: res.data[i].staff_memo
+          });
         }
       });
+      console.log(this.work_check);
     }
   },
   created: function created() {
@@ -121,7 +120,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, " PHS番号:" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(staff.phs.slice(0, 3)), 1
     /* TEXT */
     ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
-      to: '/staffdaywork/' + $props.login_user_id + '/' + staff.id + '/staffpage',
+      to: '/staffdaywork/' + $props.login_user_id + '/' + staff.staff_name + '/staffpage',
       "class": "btn btn-primary p-1"
     }, {
       "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {

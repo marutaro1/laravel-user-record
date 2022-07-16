@@ -90,7 +90,6 @@
           >
             <div v-for="memo in archive_memos" :key="memo.id">
             <div v-if="archive.factoryuser_id === memo.factoryuser_id">
-              {{memo.id}}
               <p>{{memo.memo_record}}
                 <button
                 @click="deleteArchiveMemo(memo)"
@@ -135,6 +134,7 @@
           this.copy_button_boolean = true;
         }
         this.archives = [];
+
         axios.get('/api/archives/' + day.slice(0,10)).then((res) => {
               this.archives = res.data;
 

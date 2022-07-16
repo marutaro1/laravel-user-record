@@ -76,7 +76,7 @@ const routes = [
         props: true,
         children: [
             {
-                path: '/staffdaywork/:login_user_id/works',
+                path: '/staffdaywork/:login_user_id/:today/works',
                 name: 'Works',
                 component: () => import('../components/Works.vue'),
                 props: true,

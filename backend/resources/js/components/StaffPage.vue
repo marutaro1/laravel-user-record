@@ -1,7 +1,7 @@
 <template>
-  <div @mousemove.once="getSelectStaffDailyWorks">
+  <div>
     <h3>業務編集</h3>
-    <router-link :to="'/staffdaywork/' + login_user_id +'/works'" class="btn btn-primary p-1"
+    <router-link :to="'/staffdaywork/' + login_user_id + '/' + this.today +  '/works'" class="btn btn-primary p-1"
       >戻る</router-link
     >
     <div>
@@ -35,7 +35,7 @@
         </div>
       </div>
       <button
-        @click="postCompleteWorkCheck(select_staff_daily_works.staff_name)"
+        @click="postCompleteWorkCheck(select_staff_daily_works.staff_name, select_staff_daily_works.phs.slice(0,3))"
         class="my-2 btn btn-primary"
       >
         登録
@@ -49,9 +49,11 @@
              login_user_id: String,
              select_staff_id: String,
              today: String,
+             user_department: String,
          },
          data() {
            return {
+             select_staff_data: {},
              select_staff_daily_works: [],
              select_staff_daily_work_array: [],
              change_work_check: [],
@@ -71,65 +73,109 @@
              }
            },
             getSelectStaffDailyWorks() {
-              axios.get('/api/staff_daily_work').then((res) => {
-                for(let i = 0; i < res.data.length; i++) {
-                  if(String(res.data[i].id) === this.select_staff_id && res.data[i].day === this.today) {
-                    this.select_staff_daily_works = res.data[i];
-                    const array_data =  res.data[i].works.split(',');
+              axios.get('/api/staff_daily_work/' + this.today + '/' + this.user_department + '/' + this.select_staff_id).then((res) => {               
+                    this.select_staff_daily_works = res.data[0];
+                    const array_data =  res.data[0].works.split(',');
                     this.select_staff_daily_work_array =  Object.assign({}, array_data);
                       for(let n = 0; n < array_data.length; n++) {
                         this.change_work_check.push('');
                       }
-                  }
-                }
+                
               }).then(() => {
+                this.postCompleteWorkCheck(this.select_staff_daily_works.staff_name, this.select_staff_daily_works.phs);
                 this.getCompleteWorkCheck();
               })
             },
-            postCompleteWorkCheck(name) {
-              axios.get('/api/users').then((res) => {
-                for(let i = 0; i < res.data.length; i++) {
-                 if(String(res.data[i].name) === name) {
-                  this.staff_name = name;
-                 }  
+            postCompleteWorkCheck(name, phs) {
+              console.log(phs)
+              axios.get('/api/users/name/' + name).then(() => {
+                const array = [];
+                let responce_work = '';
+                let error_data = '';
+                for (let i = 0; i < this.change_work_check.length; i++) {
+                  array.push('');
                 }
-              }).then(() => {
-                console.log(this.staff_name);
-                if(this.staff_memo === '' || this.staff_memo === '・') {
+                axios.get('/api/complete_works/' + this.today + '/' + this.select_staff_id).then((responce) => {
+                  responce_work = responce;
+                  console.log(responce)
+                  console.log(responce_work.data)
+                }).then(() => {
+
+
+                if(responce_work.data.length === 0) {
+
                   this.staff_memo = '・';
-                }
-                const add_work_check = {
-                  staff_id: this.select_staff_id,
-                  staff_name: this.staff_name,
-                  day: this.today,
-                  work_check: String(this.change_work_check),
-                  staff_memo: this.staff_memo,
-                }
-                const array_length = []
-                for(let n = 0; n < this.change_work_check.length; n++) {
-                  array_length.push('');
-                }
-                console.log(array_length)
-             
-                  axios.post('/api/complete_works/' + String(this.complete_work_id), add_work_check).then((res) => {
+      
+                  let add_work_check = {
+                    staff_id: phs,
+                    staff_name: this.select_staff_id,
+                    day: this.today,
+                    work_check: String(this.change_work_check),
+                    staff_memo: this.staff_memo,
+                  }
+                   axios.post('/api/complete_works/' + this.today, add_work_check).then((res) => {
+                    console.log(res.data)
+                    this.staff_memo = res.data.staff_memo;
+                  });
+
+                } else if(this.staff_memo === '' && array !== this.change_work_check && responce_work.data.length !== 0) {
+                  console.log(responce_work.data)
+
+                  this.staff_memo = '・';
+
+                  let add_work_check = {
+                    staff_id: phs,
+                    staff_name: this.select_staff_id,
+                    day: this.today,
+                    work_check: String(this.change_work_check),
+                    staff_memo: this.staff_memo,
+                  }
+                  axios.post('/api/complete_works/' + this.today + '/' + this.select_staff_id, add_work_check).then((res) => {
+                    console.log(res.data)
+                    this.staff_memo = res.data.staff_memo;
+                  });
+
+                } else {
+                  let add_work_check = {
+                    staff_id: phs,
+                    staff_name: this.select_staff_id,
+                    day: this.today,
+                    work_check: String(this.change_work_check),
+                    staff_memo: this.staff_memo,
+                  }
+                  axios.post('/api/complete_works/' + this.today + '/' + this.select_staff_id, add_work_check).then((res) => {
+                    console.log(res.data)
                     this.staff_memo = res.data.staff_memo;
                   });
                 
-              })
+                }
+                })
+              });
+
+              
             },
             getCompleteWorkCheck() {
-                axios.get('/api/complete_works').then((res) => {                 
-                  
-                      for(let i = 0; i < res.data.length; i++) {
-                        if(res.data[i] !== [] && res.data[i].day === this.today && String(res.data[i].staff_id) === this.select_staff_id) {
-                          this.change_work_check = res.data[i].work_check.split(',');
-                          this.staff_memo = res.data[i].staff_memo;
-                          this.complete_work_id = res.data[i].id;
-                         
+                axios.get('/api/complete_works/' + this.today + '/' + this.select_staff_id).then((res) => {
+                        if(res.data.length === 0) {
+                          console.log(res.data); 
                         }
-                      }
+                        else { 
+                          console.log(res.data); 
+                          this.change_work_check = res.data[0].work_check.split(',');
+                          console.log(this.change_work_check); 
+                          this.staff_memo = res.data[0].staff_memo;
+                          this.complete_work_id = res.data[0].id;
+                        }
                 });
+
             }
          },
+         created() {
+            axios.get('/api/users/name/' + this.select_staff_id).then((responce) => {
+                 this.select_staff_data = responce.data[0]
+            });
+            console.log(this.select_staff_id)
+            this.getSelectStaffDailyWorks();
+         }
      }
  </script>
