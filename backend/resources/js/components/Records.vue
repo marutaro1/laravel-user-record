@@ -81,8 +81,6 @@
         />
       </div>
 
-      <button @click="recordSerch">検索</button>
-
       <div class="overflow-auto" style="height:300px;">
         <div v-for="(record,key) in recordArray" :key="key">
 
@@ -463,7 +461,11 @@
 
             //サーチ用のコントローラを作成し使用
             recordSerch() {
-              if(this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
+              if(this.keyword === '') {
+                this.getRecord();
+                return;
+              }
+              else if(this.start_day === '' && this.end_day === '' && this.dayKeywordFirst === '' && this.dayKeywordSecond === '' && this.select_month === '') {
                 const day_first = this.real_date.slice(0,7);
                 this.start_day =  day_first + '-01'
                 if(Number(day_first.slice(6,7))+ 1 < 10) {
