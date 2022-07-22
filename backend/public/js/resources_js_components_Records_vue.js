@@ -350,6 +350,7 @@ __webpack_require__.r(__webpack_exports__);
       axios.get('/api/' + this.id + '/serch/' + this.keyword + '/' + this.start_day + '/' + this.end_day).then(function (res) {
         _this7.serch_responce = res.data;
       });
+      return this.serch_responce;
     },
     // 現在のページで表示するアイテムリストを取得する
     displayItems: function displayItems(array) {
@@ -552,7 +553,7 @@ var _hoisted_38 = {
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     "class": "mt-2",
-    onMousemoveOnce: _cache[16] || (_cache[16] = function () {
+    onMousemoveOnce: _cache[17] || (_cache[17] = function () {
       return $options.getRecord && $options.getRecord.apply($options, arguments);
     })
   }, [_hoisted_1, _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -636,11 +637,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[10] || (_cache[10] = function ($event) {
       return $data.keyword = $event;
     }),
+    onBlur: _cache[11] || (_cache[11] = function () {
+      return $options.recordSerch && $options.recordSerch.apply($options, arguments);
+    }),
     list: "record_data"
-  }, null, 512
-  /* NEED_PATCH */
+  }, null, 544
+  /* HYDRATE_EVENTS, NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[11] || (_cache[11] = function () {
+    onClick: _cache[12] || (_cache[12] = function () {
       return $options.recordSerch && $options.recordSerch.apply($options, arguments);
     })
   }, "検索"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.recordArray, function (record, key) {
@@ -679,12 +683,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[12] || (_cache[12] = function () {
+    onClick: _cache[13] || (_cache[13] = function () {
       return $options.first && $options.first.apply($options, arguments);
     }),
     "class": "page-link"
   }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_35, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[13] || (_cache[13] = function () {
+    onClick: _cache[14] || (_cache[14] = function () {
       return $options.prev && $options.prev.apply($options, arguments);
     }),
     "class": "page-link"
@@ -703,12 +707,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }), 128
   /* KEYED_FRAGMENT */
   )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_37, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[14] || (_cache[14] = function () {
+    onClick: _cache[15] || (_cache[15] = function () {
       return $options.next && $options.next.apply($options, arguments);
     }),
     "class": "page-link"
   }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_38, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[15] || (_cache[15] = function () {
+    onClick: _cache[16] || (_cache[16] = function () {
       return $options.last && $options.last.apply($options, arguments);
     }),
     "class": "page-link"

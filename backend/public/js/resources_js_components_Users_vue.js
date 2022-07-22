@@ -24,6 +24,7 @@ __webpack_require__.r(__webpack_exports__);
       real_date: new Date().getFullYear() + "-" + ("00" + (new Date().getMonth() + 1)).slice(-2) + "-" + ("00" + new Date().getDate()).slice(-2) + "T" + ("00" + new Date().getHours()).slice(-2) + ":" + "00",
       //入力した日付を格納する値
       boolean_day_record_check: false,
+      sort_factoryusers_data: '',
       //<---- ページネーション処理 ---->
       currentPage: 0,
       // 現在のページ番号
@@ -41,26 +42,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     factoryusersArray: function factoryusersArray() {
-      this.displayItems(this.serchFactoryusers);
+      this.serchFactoryusers();
+      this.displayItems(this.sort_factoryusers_data);
       return this.arrayData;
-    },
-    serchFactoryusers: function serchFactoryusers() {
-      var factoryuser_array = [];
-
-      for (var i in this.factoryusers) {
-        var factoryuserData = this.factoryusers[i];
-        var room_number = String(factoryuserData.number).slice(0, -2);
-
-        if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 && room_number.indexOf(this.floorKeyword) !== -1 && factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1) {
-          factoryuser_array.push(factoryuserData);
-        }
-      }
-
-      ;
-      var sort_factoryuser_data = factoryuser_array.slice().sort(function (a, b) {
-        return a.number - b.number;
-      });
-      return sort_factoryuser_data;
     },
     keywordSerchFactoryusers: function keywordSerchFactoryusers() {
       return this.serchFactoryusers.slice(0, 5);
@@ -128,6 +112,28 @@ __webpack_require__.r(__webpack_exports__);
         _this2.factoryusers = array;
       });
     },
+    serchFactoryusers: function serchFactoryusers() {
+      var factoryuser_array = [];
+
+      for (var i in this.factoryusers) {
+        var factoryuserData = this.factoryusers[i];
+        var room_number = String(factoryuserData.number).slice(0, -3);
+
+        if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 && factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1 && this.floorKeyword === '' && room_number.indexOf(this.floorKeyword) !== -1) {
+          factoryuser_array.push(factoryuserData);
+        } else if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 && room_number !== '10' && Number(factoryuserData.number) <= 10000 && room_number.indexOf(this.floorKeyword) !== -1 && factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1) {
+          factoryuser_array.push(factoryuserData);
+        } else if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 && room_number === this.floorKeyword && this.floorKeyword === '10' && room_number.indexOf(this.floorKeyword) !== -1 && factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1) {
+          factoryuser_array.push(factoryuserData);
+        }
+      }
+
+      ;
+      var sort_factoryuser_data = factoryuser_array.slice().sort(function (a, b) {
+        return a.number - b.number;
+      });
+      this.sort_factoryusers_data = sort_factoryuser_data;
+    },
     // 現在のページで表示するアイテムリストを取得する
     displayItems: function displayItems(array) {
       this.head = this.currentPage * this.size;
@@ -161,8 +167,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   created: function created() {
     this.getFactoryusers();
-    console.log(this.serchFactoryusers);
-    console.log(this.auth_id);
 
     if (this.$route.path === '/factoryusers/id') {
       this.$router.push('/factoryusers/' + this.auth_id);

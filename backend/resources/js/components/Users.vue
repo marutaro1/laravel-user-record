@@ -133,7 +133,8 @@
                         ("00" + new Date().getHours()).slice(-2) +
                         ":" +
                         "00", //入力した日付を格納する値
-        boolean_day_record_check: false,  
+        boolean_day_record_check: false, 
+        sort_factoryusers_data: '',
         //<---- ページネーション処理 ---->
             currentPage: 0, // 現在のページ番号
             size: 10, // 1ページに表示するアイテムの上限
@@ -147,29 +148,10 @@
     },
      computed: {
             factoryusersArray() {
-                this.displayItems(this.serchFactoryusers);
+                this.serchFactoryusers();
+                this.displayItems(this.sort_factoryusers_data);
                 return this.arrayData;
               },
-
-              serchFactoryusers() {
-                  const factoryuser_array  = [];
-                  for (let i in this.factoryusers) {
-                    const factoryuserData = this.factoryusers[i];
-                    const room_number = String(factoryuserData.number).slice(0, -2);
-                    if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 &&
-                        room_number.indexOf(this.floorKeyword) !== -1 &&
-                        factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1
-                    )  {
-                      factoryuser_array.push(factoryuserData);
-                    }
-                  };
-                  const sort_factoryuser_data = factoryuser_array.slice()
-                  .sort((a, b) => {
-                    return a.number - b.number;
-                   });
-
-                return sort_factoryuser_data;
-             },
 
               keywordSerchFactoryusers() {
                return this.serchFactoryusers.slice(0, 5);
@@ -235,6 +217,42 @@
             });
       },
 
+      serchFactoryusers() {            
+        const factoryuser_array  = [];
+          for (let i in this.factoryusers) {
+            const factoryuserData = this.factoryusers[i];
+            const room_number = String(factoryuserData.number).slice(0, -3);
+              if(factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 &&
+                factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1 &&
+                this.floorKeyword === '' &&
+                room_number.indexOf(this.floorKeyword) !== -1
+              ) {
+                factoryuser_array.push(factoryuserData);
+                }
+              else if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 &&
+                room_number !== '10' && Number(factoryuserData.number) <= 10000 &&
+                room_number.indexOf(this.floorKeyword) !== -1 &&
+                factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1
+              )  {
+                  factoryuser_array.push(factoryuserData);
+                  }
+              else if (factoryuserData.factoryuser_name.indexOf(this.keyword) !== -1 &&
+                room_number === this.floorKeyword &&
+                this.floorKeyword === '10' &&
+                room_number.indexOf(this.floorKeyword) !== -1 &&
+                factoryuserData.care_level.indexOf(this.serchCareLevelKeyword) !== -1
+              )  {
+                factoryuser_array.push(factoryuserData);
+                 }
+          };
+          const sort_factoryuser_data = factoryuser_array.slice()
+          .sort((a, b) => {
+            return a.number - b.number;
+          });
+          this.sort_factoryusers_data = sort_factoryuser_data;
+      },
+
+
            // 現在のページで表示するアイテムリストを取得する
             displayItems(array) {
               this.head = this.currentPage * this.size;
@@ -276,8 +294,6 @@
 
     created() {
       this.getFactoryusers();
-      console.log(this.serchFactoryusers);
-      console.log(this.auth_id)
       if(this.$route.path === '/factoryusers/id') {
         this.$router.push('/factoryusers/' + this.auth_id);
       }
