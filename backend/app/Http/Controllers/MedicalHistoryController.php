@@ -9,10 +9,13 @@ class MedicalHistoryController extends Controller
 {
     public function index($id) 
     {
-        $medical_histories = MedicalHistory::select('medical_histories.*')
+        if(isset($id)) {
+        $query = MedicalHistory::select('medical_histories.*')
         ->where('factoryuser_id', '=', $id)
-        ->orderBy('day','desc')
-        ->get();
+        ->orderBy('day','desc');
+        }
+
+        $medical_histories = $query->get();
         return $medical_histories;
     }
 

@@ -259,19 +259,19 @@
 
             serchMedicalHistory() {
               if(this.medical_keyword !== '' && this.keyword === '') {
-                axios.get('/api/' + this.id + '/medical_history/' + this.medical_keyword + '/false').then((res) => {
+                axios.get('/api/' + this.id + '/medical_history_serch/' + this.medical_keyword + '/false').then((res) => {
                   console.log('1');
                   console.log(res.data);
                   this.medical_history_data = res.data;
                 })
               } else if(this.medical_keyword === '' && this.keyword !== ''){ 
-                axios.get('/api/' + this.id + '/medical_history/false/'+ this.keyword).then((res) => {
+                axios.get('/api/' + this.id + '/medical_history_serch/false/'+ this.keyword).then((res) => {
                   console.log('2');
                   console.log(res.data);
                   this.medical_history_data = res.data;
                 })
               } else if(this.medical_keyword !== '' && this.keyword !== '') {
-                axios.get('/api/' + this.id + '/medical_history/'  + this.medical_keyword + '/' + this.keyword).then((res) => {
+                axios.get('/api/' + this.id + '/medical_history_serch/'  + this.medical_keyword + '/' + this.keyword).then((res) => {
                   console.log('3');
                   console.log(res.data);
                   this.medical_history_data = res.data;

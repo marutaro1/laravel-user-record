@@ -93,6 +93,7 @@
         type="text"
         class="form-control"
         v-model="keyword"
+        @blur="serchTreatment"
         list="treatment_record_data"
       />
       <datalist id="treatment_record_data">
@@ -213,30 +214,12 @@
            }
          },
          computed: {
-           serchTreatmentRecords() {
-             const treatment_record_data  = [];
-                for (let i in this.treatment_records_data) {
-                  const treatment_record = this.treatment_records_data[i];
-                  if (treatment_record.treatment_value.indexOf(this.keyword) !== -1)  {
-                    treatment_record_data.push(treatment_record);
-                  }
-              };
-
-              const sort_treatment_record_data = treatment_record_data.slice()
-                  .sort((a, b) => {
-                    return Number(new Date(a.day)) - Number(new Date(b.day));
-                   })
-              .reverse();
-              
-              return sort_treatment_record_data;
-           },
-
             keywordSerchTreatmentRecords() {
-               return this.serchTreatmentRecords.slice(0, 5)
+               return this.treatment_records_data.slice(0, 5)
             },
 
            treatmentRecordArray() {
-              this.displayItems(this.serchTreatmentRecords);
+              this.displayItems(this.treatment_records_data);
               return this.arrayData;
             },
              //ページ数を取得する
@@ -349,6 +332,15 @@
              axios.get('/api/factoryusers/' + this.id + '/treatments').then((res) => {
                this.treatment_records_data = res.data;
              })
+           },
+           serchTreatment() {
+             if(this.keyword === '') {
+               this.getTreatmentRecords();
+             } else if(this.keyword !== '') {
+              axios.get('/api/' + this.id + '/treatment_serch/' + this.keyword).then((res) => {
+                this.treatment_records_data = res.data;
+              });
+             }
            },
            editTreatmentRecordSelect(treatment_record) {
              if(treatment_record !== '') {

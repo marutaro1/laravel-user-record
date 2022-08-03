@@ -54,13 +54,14 @@ Route::get('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryContr
 Route::post('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryController::class, 'store']);
 Route::get('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'show']);
 Route::put('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'update']);
-Route::get('/{factoryuser}/medical_history/{medical_keywprd}/{history_keyword}', [MedicalHistoryController::class, 'serch']);
+Route::get('/{factoryuser}/medical_history_serch/{medical_keywprd}/{history_keyword}', [MedicalHistoryController::class, 'serch']);
 Route::delete('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'delete']);
 
 Route::get('/factoryusers/{factoryuser}/treatments', [TreatmentRecordController::class, 'index']);
 Route::post('/factoryusers/{factoryuser}/treatments', [TreatmentRecordController::class, 'store']);
 Route::get('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'show']);
 Route::put('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'update']);
+Route::get('/{factoryuser}/treatment_serch/{treatment_keyword}', [TreatmentRecordController::class, 'serch']);
 Route::delete('/factoryusers/treatments/{treatment}', [TreatmentRecordController::class, 'delete']);
 
 Route::get('/treatments', [TreatmentController::class, 'index']);

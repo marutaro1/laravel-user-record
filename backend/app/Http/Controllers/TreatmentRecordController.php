@@ -9,10 +9,13 @@ class TreatmentRecordController extends Controller
 {
     public function index($id) 
     {
-        $treatment_records = TreatmentRecord::select('treatment_records.*')
-        ->where('factoryuser_id', '=', $id)
-        ->whereNull('deleted_at')
-        ->get();
+        if(isset($id)) {
+            $query = TreatmentRecord::select('treatment_records.*')
+            ->where('factoryuser_id', '=', $id)
+            ->whereNull('deleted_at')
+            ->orderBy('day','desc');
+        }
+        $treatment_records = $query->get();
         return $treatment_records;
     }
 
@@ -34,6 +37,20 @@ class TreatmentRecordController extends Controller
         
         return $treatment_record;
     }
+
+    public function serch($id, $treatment_keyword) 
+    {
+        if(isset($id)) {
+            $query = TreatmentRecord::query()
+            ->where('factoryuser_id', '=', $id)
+            ->where('treatment_value', 'like', "%{$treatment_keyword}%")
+            ->orderBy('day','desc');
+        }
+
+        $treatment = $query->get();
+
+        return $treatment;
+    } 
     
     public function delete($id) 
     {
