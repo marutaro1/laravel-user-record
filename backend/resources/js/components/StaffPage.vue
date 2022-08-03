@@ -82,28 +82,29 @@
                       }
                 
               }).then(() => {
-                this.postCompleteWorkCheck(this.select_staff_daily_works.staff_name, this.select_staff_daily_works.phs);
                 this.getCompleteWorkCheck();
+                this.postCompleteWorkCheck(this.select_staff_daily_works.staff_name, this.select_staff_daily_works.phs);
               })
             },
             postCompleteWorkCheck(name, phs) {
+
               console.log(phs)
-              axios.get('/api/users/name/' + name).then(() => {
+              console.log(this.staff_memo)
+    
                 const array = [];
                 let responce_work = '';
-                let error_data = '';
                 for (let i = 0; i < this.change_work_check.length; i++) {
                   array.push('');
                 }
                 axios.get('/api/complete_works/' + this.today + '/' + this.select_staff_id).then((responce) => {
                   responce_work = responce;
-                  console.log(responce)
                   console.log(responce_work.data)
                 }).then(() => {
 
+              console.log(this.staff_memo)
 
                 if(responce_work.data.length === 0) {
-
+                  console.log('1')
                   this.staff_memo = '・';
       
                   let add_work_check = {
@@ -119,6 +120,7 @@
                   });
 
                 } else if(this.staff_memo === '' && array !== this.change_work_check && responce_work.data.length !== 0) {
+                  console.log('2')
                   console.log(responce_work.data)
 
                   this.staff_memo = '・';
@@ -136,6 +138,7 @@
                   });
 
                 } else {
+                  console.log('3')
                   let add_work_check = {
                     staff_id: phs,
                     staff_name: this.select_staff_id,
@@ -150,7 +153,7 @@
                 
                 }
                 })
-              });
+              
 
               
             },
@@ -164,6 +167,8 @@
                           this.change_work_check = res.data[0].work_check.split(',');
                           console.log(this.change_work_check); 
                           this.staff_memo = res.data[0].staff_memo;
+                           console.log('this.staff_memo'); 
+                          console.log(this.staff_memo); 
                           this.complete_work_id = res.data[0].id;
                         }
                 });

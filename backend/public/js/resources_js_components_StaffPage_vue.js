@@ -50,70 +50,72 @@ __webpack_require__.r(__webpack_exports__);
           _this.change_work_check.push('');
         }
       }).then(function () {
-        _this.postCompleteWorkCheck(_this.select_staff_daily_works.staff_name, _this.select_staff_daily_works.phs);
-
         _this.getCompleteWorkCheck();
+
+        _this.postCompleteWorkCheck(_this.select_staff_daily_works.staff_name, _this.select_staff_daily_works.phs);
       });
     },
     postCompleteWorkCheck: function postCompleteWorkCheck(name, phs) {
       var _this2 = this;
 
       console.log(phs);
-      axios.get('/api/users/name/' + name).then(function () {
-        var array = [];
-        var responce_work = '';
-        var error_data = '';
+      console.log(this.staff_memo);
+      var array = [];
+      var responce_work = '';
 
-        for (var i = 0; i < _this2.change_work_check.length; i++) {
-          array.push('');
-        }
+      for (var i = 0; i < this.change_work_check.length; i++) {
+        array.push('');
+      }
 
-        axios.get('/api/complete_works/' + _this2.today + '/' + _this2.select_staff_id).then(function (responce) {
-          responce_work = responce;
-          console.log(responce);
+      axios.get('/api/complete_works/' + this.today + '/' + this.select_staff_id).then(function (responce) {
+        responce_work = responce;
+        console.log(responce_work.data);
+      }).then(function () {
+        console.log(_this2.staff_memo);
+
+        if (responce_work.data.length === 0) {
+          console.log('1');
+          _this2.staff_memo = '・';
+          var add_work_check = {
+            staff_id: phs,
+            staff_name: _this2.select_staff_id,
+            day: _this2.today,
+            work_check: String(_this2.change_work_check),
+            staff_memo: _this2.staff_memo
+          };
+          axios.post('/api/complete_works/' + _this2.today, add_work_check).then(function (res) {
+            console.log(res.data);
+            _this2.staff_memo = res.data.staff_memo;
+          });
+        } else if (_this2.staff_memo === '' && array !== _this2.change_work_check && responce_work.data.length !== 0) {
+          console.log('2');
           console.log(responce_work.data);
-        }).then(function () {
-          if (responce_work.data.length === 0) {
-            _this2.staff_memo = '・';
-            var add_work_check = {
-              staff_id: phs,
-              staff_name: _this2.select_staff_id,
-              day: _this2.today,
-              work_check: String(_this2.change_work_check),
-              staff_memo: _this2.staff_memo
-            };
-            axios.post('/api/complete_works/' + _this2.today, add_work_check).then(function (res) {
-              console.log(res.data);
-              _this2.staff_memo = res.data.staff_memo;
-            });
-          } else if (_this2.staff_memo === '' && array !== _this2.change_work_check && responce_work.data.length !== 0) {
-            console.log(responce_work.data);
-            _this2.staff_memo = '・';
-            var _add_work_check = {
-              staff_id: phs,
-              staff_name: _this2.select_staff_id,
-              day: _this2.today,
-              work_check: String(_this2.change_work_check),
-              staff_memo: _this2.staff_memo
-            };
-            axios.post('/api/complete_works/' + _this2.today + '/' + _this2.select_staff_id, _add_work_check).then(function (res) {
-              console.log(res.data);
-              _this2.staff_memo = res.data.staff_memo;
-            });
-          } else {
-            var _add_work_check2 = {
-              staff_id: phs,
-              staff_name: _this2.select_staff_id,
-              day: _this2.today,
-              work_check: String(_this2.change_work_check),
-              staff_memo: _this2.staff_memo
-            };
-            axios.post('/api/complete_works/' + _this2.today + '/' + _this2.select_staff_id, _add_work_check2).then(function (res) {
-              console.log(res.data);
-              _this2.staff_memo = res.data.staff_memo;
-            });
-          }
-        });
+          _this2.staff_memo = '・';
+          var _add_work_check = {
+            staff_id: phs,
+            staff_name: _this2.select_staff_id,
+            day: _this2.today,
+            work_check: String(_this2.change_work_check),
+            staff_memo: _this2.staff_memo
+          };
+          axios.post('/api/complete_works/' + _this2.today + '/' + _this2.select_staff_id, _add_work_check).then(function (res) {
+            console.log(res.data);
+            _this2.staff_memo = res.data.staff_memo;
+          });
+        } else {
+          console.log('3');
+          var _add_work_check2 = {
+            staff_id: phs,
+            staff_name: _this2.select_staff_id,
+            day: _this2.today,
+            work_check: String(_this2.change_work_check),
+            staff_memo: _this2.staff_memo
+          };
+          axios.post('/api/complete_works/' + _this2.today + '/' + _this2.select_staff_id, _add_work_check2).then(function (res) {
+            console.log(res.data);
+            _this2.staff_memo = res.data.staff_memo;
+          });
+        }
       });
     },
     getCompleteWorkCheck: function getCompleteWorkCheck() {
@@ -127,6 +129,8 @@ __webpack_require__.r(__webpack_exports__);
           _this3.change_work_check = res.data[0].work_check.split(',');
           console.log(_this3.change_work_check);
           _this3.staff_memo = res.data[0].staff_memo;
+          console.log('this.staff_memo');
+          console.log(_this3.staff_memo);
           _this3.complete_work_id = res.data[0].id;
         }
       });
