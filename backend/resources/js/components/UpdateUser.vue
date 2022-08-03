@@ -55,8 +55,6 @@
              update_care_level: '',
            }
          },
-         computed: {
-         },
          methods: {
           updateUser() {
             axios.get('/api/factoryusers/' + this.id).then((res) => {

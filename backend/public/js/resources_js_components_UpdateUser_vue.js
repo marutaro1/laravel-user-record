@@ -24,7 +24,6 @@ __webpack_require__.r(__webpack_exports__);
       update_care_level: ''
     };
   },
-  computed: {},
   methods: {
     updateUser: function updateUser() {
       var _this = this;

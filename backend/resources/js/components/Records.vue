@@ -459,7 +459,7 @@
                 .reverse();
             },
 
-            //サーチ用のコントローラを作成し使用
+      
             recordSerch() {
               if(this.keyword === '') {
                 this.getRecord();
@@ -522,7 +522,6 @@
               axios.get('/api/' + this.id + '/serch/' + this.keyword + '/' + this.start_day + '/' + this.end_day).then((res) => {
                 this.serch_responce = res.data;
               })
-              return this.serch_responce;
             },
 
            // 現在のページで表示するアイテムリストを取得する

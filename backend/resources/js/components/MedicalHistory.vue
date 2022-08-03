@@ -58,7 +58,7 @@
 
       <label class="col-5 col-form-label">診療科検索:</label>
       <div class="col-3 col-lg-3">
-        <select class="form-select form-select-sm pb-0" v-model="medical_keyword">
+        <select class="form-select form-select-sm pb-0" v-model="medical_keyword"  @blur="serchMedicalHistory">
           <option value=""></option>
           <option value="内科">内科</option>
           <option value="外科">外科</option>
@@ -72,6 +72,7 @@
           type="text"
           class="form-control"
           v-model="keyword"
+           @blur="serchMedicalHistory"
           list="medical_history_data"
         />
         <datalist id="medical_history_data">
@@ -165,31 +166,12 @@
          },
          computed: {
             medicalHistorySerchArray() {
-                this.displayItems(this.serchMedicalHistories);
+                this.displayItems(this.medical_history_data);
                 return this.arrayData;
-            },
-            serchMedicalHistories() {
-              const medical_history_array  = [];
-              for (let i in this.medical_history_data) {
-                const medicalHistoryData = this.medical_history_data[i];
-                if (medicalHistoryData.medical_history_value.indexOf(this.keyword) !== -1 
-                && medicalHistoryData.medical.indexOf(this.medical_keyword) !== -1
-                )  {
-                  medical_history_array.push(medicalHistoryData);
-                }
-              };
-
-                  const sort_medical_history_data = medical_history_array.slice()
-                  .sort((a, b) => {
-                    return Number(new Date(a.day)) - Number(new Date(b.day));
-                   })
-                  .reverse();
-
-              return sort_medical_history_data;
             },
 
             keywordSerchMedicalHistories() {
-               return this.serchMedicalHistories.slice(0, 5);
+               return this.medical_history_data.slice(0, 5);
             },
 
             pages() {
@@ -274,6 +256,31 @@
                this.getMedicalHIstory();
              })
            },
+
+            serchMedicalHistory() {
+              if(this.medical_keyword !== '' && this.keyword === '') {
+                axios.get('/api/' + this.id + '/medical_history/' + this.medical_keyword + '/false').then((res) => {
+                  console.log('1');
+                  console.log(res.data);
+                  this.medical_history_data = res.data;
+                })
+              } else if(this.medical_keyword === '' && this.keyword !== ''){ 
+                axios.get('/api/' + this.id + '/medical_history/false/'+ this.keyword).then((res) => {
+                  console.log('2');
+                  console.log(res.data);
+                  this.medical_history_data = res.data;
+                })
+              } else if(this.medical_keyword !== '' && this.keyword !== '') {
+                axios.get('/api/' + this.id + '/medical_history/'  + this.medical_keyword + '/' + this.keyword).then((res) => {
+                  console.log('3');
+                  console.log(res.data);
+                  this.medical_history_data = res.data;
+                })
+              } else if(this.medical_keyword === '' && this.keyword === '') {
+                this.getMedicalHIstory();
+              }
+
+            },
 
            // 現在のページで表示するアイテムリストを取得する
             displayItems(array) {

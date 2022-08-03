@@ -46,28 +46,11 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     medicalHistorySerchArray: function medicalHistorySerchArray() {
-      this.displayItems(this.serchMedicalHistories);
+      this.displayItems(this.medical_history_data);
       return this.arrayData;
     },
-    serchMedicalHistories: function serchMedicalHistories() {
-      var medical_history_array = [];
-
-      for (var i in this.medical_history_data) {
-        var medicalHistoryData = this.medical_history_data[i];
-
-        if (medicalHistoryData.medical_history_value.indexOf(this.keyword) !== -1 && medicalHistoryData.medical.indexOf(this.medical_keyword) !== -1) {
-          medical_history_array.push(medicalHistoryData);
-        }
-      }
-
-      ;
-      var sort_medical_history_data = medical_history_array.slice().sort(function (a, b) {
-        return Number(new Date(a.day)) - Number(new Date(b.day));
-      }).reverse();
-      return sort_medical_history_data;
-    },
     keywordSerchMedicalHistories: function keywordSerchMedicalHistories() {
-      return this.serchMedicalHistories.slice(0, 5);
+      return this.medical_history_data.slice(0, 5);
     },
     pages: function pages() {
       return Math.ceil(this.items.length / this.size);
@@ -161,6 +144,31 @@ __webpack_require__.r(__webpack_exports__);
         _this4.getMedicalHIstory();
       });
     },
+    serchMedicalHistory: function serchMedicalHistory() {
+      var _this5 = this;
+
+      if (this.medical_keyword !== '' && this.keyword === '') {
+        axios.get('/api/' + this.id + '/medical_history/' + this.medical_keyword + '/false').then(function (res) {
+          console.log('1');
+          console.log(res.data);
+          _this5.medical_history_data = res.data;
+        });
+      } else if (this.medical_keyword === '' && this.keyword !== '') {
+        axios.get('/api/' + this.id + '/medical_history/false/' + this.keyword).then(function (res) {
+          console.log('2');
+          console.log(res.data);
+          _this5.medical_history_data = res.data;
+        });
+      } else if (this.medical_keyword !== '' && this.keyword !== '') {
+        axios.get('/api/' + this.id + '/medical_history/' + this.medical_keyword + '/' + this.keyword).then(function (res) {
+          console.log('3');
+          console.log(res.data);
+          _this5.medical_history_data = res.data;
+        });
+      } else if (this.medical_keyword === '' && this.keyword === '') {
+        this.getMedicalHIstory();
+      }
+    },
     // 現在のページで表示するアイテムリストを取得する
     displayItems: function displayItems(array) {
       this.head = this.currentPage * this.size;
@@ -193,10 +201,10 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   created: function created() {
-    var _this5 = this;
+    var _this6 = this;
 
     axios.get('/api/users/' + this.login_user_id).then(function (res) {
-      _this5.staff_name = res.data.name;
+      _this6.staff_name = res.data.name;
     });
   }
 });
@@ -422,7 +430,7 @@ var _hoisted_47 = {
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-    onMousemoveOnce: _cache[13] || (_cache[13] = function () {
+    onMousemoveOnce: _cache[15] || (_cache[15] = function () {
       return $options.getMedicalHIstory && $options.getMedicalHIstory.apply($options, arguments);
     }),
     "class": "mt-2"
@@ -479,18 +487,24 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "form-select form-select-sm pb-0",
     "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
       return $data.medical_keyword = $event;
+    }),
+    onBlur: _cache[8] || (_cache[8] = function () {
+      return $options.serchMedicalHistory && $options.serchMedicalHistory.apply($options, arguments);
     })
-  }, _hoisted_32, 512
-  /* NEED_PATCH */
+  }, _hoisted_32, 544
+  /* HYDRATE_EVENTS, NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.medical_keyword]])]), _hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     "class": "form-control",
-    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
+    "onUpdate:modelValue": _cache[9] || (_cache[9] = function ($event) {
       return $data.keyword = $event;
     }),
+    onBlur: _cache[10] || (_cache[10] = function () {
+      return $options.serchMedicalHistory && $options.serchMedicalHistory.apply($options, arguments);
+    }),
     list: "medical_history_data"
-  }, null, 512
-  /* NEED_PATCH */
+  }, null, 544
+  /* HYDRATE_EVENTS, NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.keyword]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("datalist", _hoisted_35, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.keywordSerchMedicalHistories, function (n) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("option", {
       key: n
@@ -528,12 +542,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.currentPage + 1) + "ページ", 1
   /* TEXT */
   ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_41, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[9] || (_cache[9] = function () {
+    onClick: _cache[11] || (_cache[11] = function () {
       return $options.first && $options.first.apply($options, arguments);
     }),
     "class": "page-link"
   }, "«")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_44, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[10] || (_cache[10] = function () {
+    onClick: _cache[12] || (_cache[12] = function () {
       return $options.prev && $options.prev.apply($options, arguments);
     }),
     "class": "page-link"
@@ -552,12 +566,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }), 128
   /* KEYED_FRAGMENT */
   )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_46, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[11] || (_cache[11] = function () {
+    onClick: _cache[13] || (_cache[13] = function () {
       return $options.next && $options.next.apply($options, arguments);
     }),
     "class": "page-link"
   }, ">")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", _hoisted_47, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-    onClick: _cache[12] || (_cache[12] = function () {
+    onClick: _cache[14] || (_cache[14] = function () {
       return $options.last && $options.last.apply($options, arguments);
     }),
     "class": "page-link"

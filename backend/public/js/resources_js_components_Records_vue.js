@@ -296,7 +296,6 @@ __webpack_require__.r(__webpack_exports__);
         return Number(new Date(a.day)) - Number(new Date(b.day));
       }).reverse();
     },
-    //サーチ用のコントローラを作成し使用
     recordSerch: function recordSerch() {
       var _this7 = this;
 
@@ -353,7 +352,6 @@ __webpack_require__.r(__webpack_exports__);
       axios.get('/api/' + this.id + '/serch/' + this.keyword + '/' + this.start_day + '/' + this.end_day).then(function (res) {
         _this7.serch_responce = res.data;
       });
-      return this.serch_responce;
     },
     // 現在のページで表示するアイテムリストを取得する
     displayItems: function displayItems(array) {

@@ -40,19 +40,21 @@ Route::get('/factoryusers/{factoryuser}/records/{day}/{day_end}', [RecordControl
 Route::post('/factoryusers/{factoryuser}/records', [RecordController::class, 'store']);
 Route::get('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'show']);
 Route::put('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'update']);
-Route::get('/{record}/serch/{record_keyword}/{day}/{day_end}', [RecordController::class, 'serch']);
+Route::get('/{factoryuser}/serch/{record_keyword}/{day}/{day_end}', [RecordController::class, 'serch']);
 Route::delete('/factoryusers/factoryuser/records/{record}', [RecordController::class, 'delete']);
 
 Route::get('/factoryusers/{factoryuser}/manuels', [ManuelController::class, 'index']);
 Route::post('/factoryusers/{factoryuser}/manuels', [ManuelController::class, 'store']);
 Route::get('/factoryusers/manuels/{manuel}', [ManuelController::class, 'show']);
 Route::put('/factoryusers/manuels/{manuel}', [ManuelController::class, 'update']);
+Route::get('/{factoryuser}/manuel_serch/{manuel_keyword}', [ManuelController::class, 'serch']);
 Route::delete('/factoryusers/manuels/{manuel}', [ManuelController::class, 'delete']);
 
 Route::get('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryController::class, 'index']);
 Route::post('/factoryusers/{factoryuser}/medical_histories', [MedicalHistoryController::class, 'store']);
 Route::get('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'show']);
 Route::put('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'update']);
+Route::get('/{factoryuser}/medical_history/{medical_keywprd}/{history_keyword}', [MedicalHistoryController::class, 'serch']);
 Route::delete('/factoryusers/medical_histories/{medical_history}', [MedicalHistoryController::class, 'delete']);
 
 Route::get('/factoryusers/{factoryuser}/treatments', [TreatmentRecordController::class, 'index']);

@@ -36,6 +36,7 @@
         type="text"
         class="form-control"
         v-model="keyword"
+         @blur="manuelSerch"
         list="manuel_data"
       />
        <datalist id="manuel_data">
@@ -85,9 +86,11 @@
             <li class="page-item">
               <a @click="next" class="page-link">&gt;</a>
             </li>
+
             <li class="page-item">
               <a @click="last" class="page-link">&raquo;</a>
             </li>
+            
           </ul>
         </nav>
       </div>
@@ -123,25 +126,14 @@
            }
          },
          computed: {
-            serchManuels() {
-              const manuel_array  = [];
-              for (let i in this.manuel_data) {
-                const manuelData = this.manuel_data[i];
-                if (manuelData.manuel_value.indexOf(this.keyword) !== -1)  {
-                  manuel_array.push(manuelData);
-                }
-              };
-              return manuel_array;
+            keywordSerchManuels() {
+               return this.manuel_data.slice(0, 5)
             },
-
-              keywordSerchManuels() {
-               return this.serchManuels.slice(0, 5)
-             },
 
              manuelArray() {
-              this.displayItems(this.serchManuels);
+              this.displayItems(this.manuel_data);
               return this.arrayData;
-            },
+             },
              //ページ数を取得する
              pages() {
               return Math.ceil(this.items.length / this.size);
@@ -188,7 +180,6 @@
                 manuel_value: this.manuel,
              }
              axios.post('/api/factoryusers/' + this.id + '/manuels', manuel_value).then((res) => {
-               console.log(res);
                this.getManuel();
                this.title = '';
                this.manuel = '';
@@ -220,6 +211,18 @@
                this.getManuel();
                console.log(res.data);
              })
+           },
+
+           manuelSerch() {
+             if(this.keyword === '') {
+                this.getManuel();
+                return;
+              }
+              else if(this.keyword !== '') {
+                axios.get('/api/' + this.id + '/manuel_serch/' + this.keyword).then((res) => {
+                  this.manuel_data = res.data;
+                })
+              }
            },
 
 

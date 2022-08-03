@@ -9,9 +9,15 @@ class ManuelController extends Controller
 {
     public function index($id) 
     {
-        $manuels = Manuel::select('manuels.*')
-        ->where('factoryuser_id', '=', $id)
-        ->get();
+
+        if(isset($id)) {
+            $query = Manuel::query()
+            ->where('factoryuser_id', '=', $id)
+            ->orderBy('created_at','desc');;
+        }
+
+        $manuels = $query->get();
+
         return $manuels;
     }
 
@@ -30,6 +36,20 @@ class ManuelController extends Controller
     {
         $manuel->update($request->all());
         
+        return $manuel;
+    }
+
+    public function serch($id, $manuel_keyword) {
+
+        if(isset($id)) {
+            $query = Manuel::query()
+            ->where('factoryuser_id', '=', $id)
+            ->where('manuel_value', 'like', "%{$manuel_keyword}%")
+            ->orderBy('created_at','desc');
+        }
+
+        $manuel = $query->get();
+
         return $manuel;
     }
     
