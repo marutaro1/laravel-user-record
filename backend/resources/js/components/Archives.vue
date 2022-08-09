@@ -148,23 +148,10 @@
           });
       },
       copyArchives() {
-          for(let i = 0; i < this.archives.length; i++) {
-            const copy_archive_data = {
-              id: this.archives[i].id,
-              factoryuser_id: this.archives[i].factoryuser_id,
-              factoryuser_name: this.archives[i].factoryuser_name,
-              factoryuser_number: this.archives[i].factoryuser_number,
-              staff_id: this.archives[i].staff_id,
-              staff_name: this.archives[i].staff_name,
-              day: this.serch_archive_today,
-              archive_record: this.archives[i].archive_record,
-              archive_memo: this.archives[i].archive_memo
-            }
-
-            axios.post('/api/archives/' + this.serch_archive_today, copy_archive_data).then((res) => {
-              console.log(res.data);
-            });
-          }
+       console.log(this.archives);
+       axios.post('/api/archives_copy/' + this.serch_archive_today, this.archives).then((res) => {
+         console.log(res.data);
+       })
       },
       updateArchiveRecord(archive) {
         archive.archive_record = this.update_archive_record_value;

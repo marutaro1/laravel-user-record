@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Archive extends Model
 {
-    // protected $table = 'archive';
+    // use HasFactory;
+    // protected $table = 'archives';
     
     protected $fillable = [
         'factoryuser_id',
@@ -21,4 +22,5 @@ class Archive extends Model
         'updated_at',
         'created_at',
     ];
+
 }

@@ -74,6 +74,7 @@ Route::get('/archives/{day}', [ArchiveController::class, 'index']);
 Route::post('/archives/{day}', [ArchiveController::class, 'store']);
 Route::get('/archives/{archive}', [ArchiveController::class, 'show']);
 Route::put('/archives/{archive}', [ArchiveController::class, 'update']);
+Route::post('/archives_copy/{day}', [ArchiveController::class, 'copy']);
 Route::delete('/archives/{archive}', [ArchiveController::class, 'delete']);
 
 Route::get('/memos/{day}/{user}', [ArchiveMemoController::class, 'index']);

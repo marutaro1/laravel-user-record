@@ -53,6 +53,41 @@ class ArchiveController extends Controller
         return $archive;
     }
 
+    public function copy(Request $request, $day) 
+    {
+
+        if(isset($day)) {
+            $query = Archive::query()
+            ->where('day', '=', $day)
+            ->where('factoryuser_id', '=', $request['factoryuser_id'])
+            ->get();
+        }
+
+        if($query->values()->all() !== []) { 
+        
+           $this->delete($query[0]);
+        }
+
+        $request_copy_data = [];
+        $request_copy_data_count = [];
+
+        foreach($request->all() as $request_data) {
+            $request_data['day'] = $day;
+            array_push($request_copy_data, $request_data);
+            array_push($request_copy_data_count, count($request_copy_data));
+        }
+        
+        foreach($request_copy_data_count as $count) {
+            Archive::create($request_copy_data[$count - 1]);
+        }
+
+        return;
+
+
+        
+
+    }
+
     public function delete(Archive $archive)
     {
        $archive->delete();
