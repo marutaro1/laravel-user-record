@@ -439,13 +439,7 @@
                archive_record: record.record_value,
                archive_memo: '・',
              }
-
-             axios.get('/api/archives/' + this.real_date.slice(0,10) ).then((res) => { 
-           console.log('res.data')
-             }).then(() => {
-              axios.post('/api/archives/' + this.real_date.slice(0,10), post_archive_value)
-             })
-
+              axios.post('/api/archives/' + this.real_date.slice(0,10), post_archive_value);
              })
            },
 

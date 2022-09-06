@@ -283,11 +283,7 @@ __webpack_require__.r(__webpack_exports__);
           archive_record: record.record_value,
           archive_memo: '・'
         };
-        axios.get('/api/archives/' + _this6.real_date.slice(0, 10)).then(function (res) {
-          console.log('res.data');
-        }).then(function () {
-          axios.post('/api/archives/' + _this6.real_date.slice(0, 10), post_archive_value);
-        });
+        axios.post('/api/archives/' + _this6.real_date.slice(0, 10), post_archive_value);
       });
     },
     sortArray: function sortArray(array) {

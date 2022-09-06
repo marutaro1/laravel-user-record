@@ -67,6 +67,7 @@
     },
     methods: {
       submit() {
+        this.factoryuser_name = '_' + this.factoryuser_name;
         const factoryuser = {
           factoryuser_name: this.factoryuser_name,
           birthday: this.birthday,

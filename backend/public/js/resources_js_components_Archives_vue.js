@@ -95,7 +95,6 @@ __webpack_require__.r(__webpack_exports__);
 
       this.archive_memos = [];
       axios.get('/api/memos/' + this.serch_archive_today + '/' + this.login_user_id).then(function (res) {
-        console.log(res);
         _this5.archive_memos = res.data;
       });
     },

@@ -33,8 +33,10 @@ Route::get('/users/name/{user_name}', [UserController::class, 'serch']);
 
 Route::get('/factoryusers', [FactoryuserController::class, 'index']);
 Route::post('/factoryusers', [FactoryuserController::class, 'store']);
+Route::get('/factoryusers/{day}', [FactoryuserController::class, 'check']);
 Route::get('/factoryusers/{factoryuser}', [FactoryuserController::class, 'show']);
 Route::put('/factoryusers/{factoryuser}', [FactoryuserController::class, 'update']);
+Route::get('/serch/{day}/{factoryuser_keyword}/{floor_keyword}/{care_level_keyword}', [FactoryuserController::class, 'serch']);
 
 Route::get('/factoryusers/{factoryuser}/records/{day}/{day_end}', [RecordController::class, 'index']);
 Route::post('/factoryusers/{factoryuser}/records', [RecordController::class, 'store']);

@@ -7,10 +7,11 @@
         type="text"
         class="form-control"
         v-model="keyword"
+        @blur="factoryuserSerch"
         list="factoryuser_data"
       />
       <datalist id="factoryuser_data">
-        <option v-for="n in serchFactoryusers">
+        <option v-for="n in factoryusers">
           {{n.factoryuser_name}}
         </option>
       </datalist>
@@ -18,7 +19,10 @@
 
     <label class="col-5 col-form-label">フロア検索: </label>
     <div class="col-6 col-lg-2">
-      <select class="form-select form-select-sm" v-model="floorKeyword">
+      <select class="form-select form-select-sm" 
+      v-model="floorKeyword"
+      @change="factoryuserSerch"
+      >
         <option value="">選択してください</option>
         <option
           v-for="n in [
@@ -46,6 +50,7 @@
       <select
         class="form-select form-select-sm"
         v-model="serchCareLevelKeyword"
+        @change="factoryuserSerch"
       >
         <option value="" selected="selected">選択してください</option>
         <option value="自立">自立</option>
@@ -58,11 +63,11 @@
     <div>
       <div v-if="boolean_day_record_check === false">
         <button @click="todayNotRegisteredRecord" class="btn btn-primary mt-2">
-          {{ real_date.slice(0,10) }} 記録未登録者
+          {{ real_date }} 記録未登録者
         </button>
       </div>
       <div v-else-if="boolean_day_record_check === true">
-        <button @click="getFactoryusers" class="btn btn-warning mt-2">
+        <button @click="changeBoolean" class="btn btn-warning mt-2">
           戻る
         </button>
       </div>
@@ -128,11 +133,7 @@
                         "-" +
                         ("00" + (new Date().getMonth() + 1)).slice(-2) +
                         "-" +
-                        ("00" + new Date().getDate()).slice(-2) +
-                        "T" +
-                        ("00" + new Date().getHours()).slice(-2) +
-                        ":" +
-                        "00", //入力した日付を格納する値
+                        ("00" + new Date().getDate()).slice(-2), //入力した日付を格納する値
         boolean_day_record_check: false, 
         sort_factoryusers_data: '',
         //<---- ページネーション処理 ---->
@@ -148,13 +149,12 @@
     },
      computed: {
             factoryusersArray() {
-                this.serchFactoryusers();
-                this.displayItems(this.sort_factoryusers_data);
+                this.displayItems(this.factoryusers);
                 return this.arrayData;
               },
 
               keywordSerchFactoryusers() {
-               return this.serchFactoryusers.slice(0, 5);
+               return this.factoryusers.slice(0, 5);
              },
 
               //ページ数を取得する
@@ -205,20 +205,25 @@
       },
 
       todayNotRegisteredRecord() {
-            const array = [];
             this.boolean_day_record_check = true;
-            axios.get('/api/factoryusers').then((res) => {
-              for(let i = 0; i <res.data.length; i++) {
-                if(res.data[i].day_record_check !== this.real_date.slice(0, 10)) {
-                  array.push(res.data[i]);
-                }
-              }
-              this.factoryusers = array;
+            this.keyword = '';
+            this.floorKeyword = '';
+            this.serchCareLevelKeyword = '';
+            axios.get('/api/factoryusers/' + this.real_date).then((res) => {
+              this.factoryusers = res.data;
             });
       },
 
+      changeBoolean() {
+        this.boolean_day_record_check = !this.boolean_day_record_check;
+        this.keyword = '';
+        this.floorKeyword = '';
+        this.serchCareLevelKeyword = '';
+        this.factoryuserSerch();
+      },
+
       serchFactoryusers() {            
-        const factoryuser_array  = [];
+        const factoryuser_array  = [];11
           for (let i in this.factoryusers) {
             const factoryuserData = this.factoryusers[i];
             const room_number = String(factoryuserData.number).slice(0, -3);
@@ -250,6 +255,59 @@
             return a.number - b.number;
           });
           this.sort_factoryusers_data = sort_factoryuser_data;
+      },
+
+      factoryuserSerch() {
+        if(this.floorKeyword === '') {
+          this.floorKeyword = '・';
+        }
+        if(this.serchCareLevelKeyword === '') {
+          this.serchCareLevelKeyword = '・';
+        }
+
+        if(this.keyword === '' && this.floorKeyword === '・' && this.serchCareLevelKeyword === '・') {
+          this.getFactoryusers();
+          console.log('スペース');
+          this.floorKeyword = '';
+          this.serchCareLevelKeyword = '';
+
+        } else if(this.boolean_day_record_check === true) {
+          console.log('false');
+          if(this.keyword === '') {
+            this.keyword = '_';
+          }
+          axios.get('/api/serch/' + this.real_date + '/' + this.keyword + '/' + this.floorKeyword + '/' + this.serchCareLevelKeyword).then((res) => {
+            this.factoryusers = res.data;
+              if(this.keyword === '_') {
+              this.keyword = '';
+            }
+              if(this.floorKeyword === '・') {
+                this.floorKeyword = '';
+              }
+              if(this.serchCareLevelKeyword === '・') {
+                this.serchCareLevelKeyword = '';
+              }
+          });
+        } else if(this.boolean_day_record_check === false) {
+          console.log('true');
+          console.log(this.serchCareLevelKeyword);
+           if(this.keyword === '') {
+            this.keyword = '_';
+            }
+          axios.get('/api/serch/no_select_real_date/' + this.keyword + '/' + this.floorKeyword + '/' + this.serchCareLevelKeyword).then((res) => {
+            this.factoryusers = res.data;
+              if(this.keyword === '_') {
+                this.keyword = '';
+              }
+              if(this.floorKeyword === '・') {
+                this.floorKeyword = '';
+              }
+              if(this.serchCareLevelKeyword === '・') {
+                this.serchCareLevelKeyword = '';
+              }
+          });
+        } 
+
       },
 
 

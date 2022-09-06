@@ -23,6 +23,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     submit: function submit() {
+      this.factoryuser_name = '_' + this.factoryuser_name;
       var factoryuser = {
         factoryuser_name: this.factoryuser_name,
         birthday: this.birthday,

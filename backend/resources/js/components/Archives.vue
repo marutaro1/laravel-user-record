@@ -185,7 +185,6 @@
       getArchiveMemo() {
         this.archive_memos = [];
           axios.get('/api/memos/' + this.serch_archive_today + '/' + this.login_user_id).then((res) => {
-            console.log(res);
             this.archive_memos = res.data;
         })
       },

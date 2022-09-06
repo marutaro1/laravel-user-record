@@ -18,10 +18,6 @@ class ArchiveMemoController extends Controller
             ->get();
         }
 
-
-
-
-
         return $archive_memo;
     }
 
